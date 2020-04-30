@@ -338,3 +338,8 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+# appsettings.json (in /300Messenger/)
+# Because it contains Db information, it is excluded
+300Messenger/appsettings.json
+300Messenger/appsettings.Development.json
