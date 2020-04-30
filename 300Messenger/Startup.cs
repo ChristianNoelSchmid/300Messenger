@@ -28,14 +28,19 @@ namespace _300Messenger
             services.AddControllersWithViews();
 
             services.AddDbContextPool<AppDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
+                options.UseMySql(Configuration.GetConnectionString("DefaultConnection"))
             );
 
+            // The Dependency Injection Methods - Uncomment the AddSingleton method to
+            // inject the In-Memory Repository. Uncomment AddScoped for the Database
+            // Repository
             //services.AddSingleton<IMessageRepository, MockMessageRepository>();
             services.AddScoped<IMessageRepository, SQLMessageRepository>();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary> 
+        /// Method configures the HTTP request pipeline. Middleware is adjusted here.
+        /// </summary>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -48,6 +53,11 @@ namespace _300Messenger
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            // For Middleware, the application uses:
+            // UseHttpsRedirection - to allow redirects for requests
+            // UseStaticFiles - allows static html, css, javascript, and image files
+            //                  to be used in site.
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
