@@ -4,5 +4,16 @@
     ViewData["Title"] = $"From {Model.Email}";
 }
 
-<h1>@Model.Email</h1>
-<p>@Model.Content</p>
+<div class="container">
+    <h1>@Model.Email</h1>
+    @if(Model.ImagePaths != null)
+    {
+        var imagepaths = Model.ImagePaths.Split(',');
+        foreach(var imagepath in imagepaths)
+        {
+            <a href="~/Images/@imagepath"><img src="~/Images/@imagepath" class="img-thumb img-responsive" asp-append-version="true"></a>
+        }
+    }
+    <p>@Model.Content</p>
+    <a class="btn btn-danger" asp-controller="Message" asp-action="Delete" asp-route-id="@Model.Id">Remove</a>
+</div>

@@ -30,6 +30,9 @@ namespace _300Messenger.Migrations
                         .IsRequired()
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
+                    b.Property<string>("ImagePaths")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
                     b.HasKey("Id");
 
                     b.ToTable("Messages");

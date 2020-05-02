@@ -37,7 +37,6 @@ namespace _300Messenger
             //services.AddSingleton<IMessageRepository, MockMessageRepository>();
             services.AddScoped<IMessageRepository, SQLMessageRepository>();
         }
-
         /// <summary> 
         /// Method configures the HTTP request pipeline. Middleware is adjusted here.
         /// </summary>

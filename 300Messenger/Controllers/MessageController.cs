@@ -1,8 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using _300Messenger.Models;
+using _300Messenger.Tools;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,9 +19,17 @@ namespace _300Messenger.Controllers
     {
         private readonly IMessageRepository messageRepository;
 
-        public MessageController(IMessageRepository repository)
+        // The IWebHostEnvironment interface retrieves information
+        // about the hosting environment. It's from this interface that
+        // we retrieve the directory to the wwwroot folder 
+        // (see Create(MessageCreateViewModel) method)
+        private readonly IWebHostEnvironment hostingEnvironment;
+
+        public MessageController(IMessageRepository repository,
+                                 IWebHostEnvironment hostingEnvironment)
         {
             this.messageRepository = repository;
+            this.hostingEnvironment = hostingEnvironment;
         }
 
         // GET: Message
@@ -39,22 +54,29 @@ namespace _300Messenger.Controllers
         // POST: Message/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Message message)
+        public ActionResult Create(MessageCreateViewModel viewModel)
         {
-            try
+            if(ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
+                StringBuilder uniqueFilenames = new StringBuilder();
+                if(viewModel.Image != null) 
                 {
-                    throw new Exception();
+                    foreach(IFormFile file in viewModel.Image)
+                    {
+                        uniqueFilenames.Append(ImageTools.SaveAndOrientImage(file, hostingEnvironment) + ",");
+                    }
+                    uniqueFilenames.Remove(uniqueFilenames.Length - 1, 1);
                 }
-
-                messageRepository.CreateMessage(message);
+                
+                var message = messageRepository.CreateMessage(new Message() {
+                    Email = viewModel.Email,
+                    Content = viewModel.Content,
+                    ImagePaths = uniqueFilenames.Length > 0 ? uniqueFilenames.ToString() : null
+                });
                 return RedirectToAction("details", new { id = message.Id });
             }
-            catch
-            {
-                return View();
-            }
+
+            return View(viewModel);
         }
 
         /*// GET: Message/Edit/5
@@ -78,16 +100,16 @@ namespace _300Messenger.Controllers
             {
                 return View();
             }
-        }
+        }*/
 
-        // GET: Message/Delete/5
-        public ActionResult Delete(int id)
+        public IActionResult Delete(int id)
         {
-            return View();
+            messageRepository.DeleteMessage(id);
+            return RedirectToAction(nameof(Index));
         }
 
         // POST: Message/Delete/5
-        [HttpPost]
+        /*[HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, IFormCollection collection)
         {
