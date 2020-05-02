@@ -59,12 +59,9 @@ namespace _300Messenger.Controllers
             if(ModelState.IsValid)
             {
                 StringBuilder uniqueFilenames = new StringBuilder();
-                if(viewModel.Images != null) 
+                if(viewModel.Image != null) 
                 {
-                    foreach(IFormFile file in viewModel.Images)
-                    {
-                        uniqueFilenames.Append(ImageTools.SaveAndOrientImage(file, hostingEnvironment) + ",");
-                    }
+                    uniqueFilenames.Append(ImageTools.SaveAndOrientImage(viewModel.Image, hostingEnvironment) + ",");
                     uniqueFilenames.Remove(uniqueFilenames.Length - 1, 1);
                 }
                 
