@@ -16,13 +16,13 @@
             <input asp-for="Content" class="form-control" />
             <span asp-validation-for="Content" class="text-danger"></span>
         </div>
-        <label asp-for="Image" class="col-md-2 control-label"></label>
+        <label asp-for="Images" class="col-md-2 control-label"></label>
         <div class="col-md-10">
             <div class="custom-file">
-                <input multiple asp-for="Image" accept=".png, .jpeg, .jpg, .gif, .bmp" class="form-control custom-file-input" />
+                <input multiple asp-for="Images" accept=".png, .jpeg, .jpg, .gif, .bmp" class="form-control custom-file-input" />
                 <label class="custom-file-label">Choose File...</label>
             </div>
-            <span asp-validation-for="Image" class="text-danger"></span>
+            <span asp-validation-for="Images" class="text-danger"></span>
         </div>
     </div>
     <!--<div asp-validation-summary="All" class="text-danger"></div>-->
