@@ -15,9 +15,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace _300Messenger.Controllers
 {
-    public class MessageController : Controller
+    public class MessageSessionController : Controller
     {
-        private readonly IMessageRepository messageRepository;
+        private readonly IMessageSessionRepository messageRepository;
 
         // The IWebHostEnvironment interface retrieves information
         // about the hosting environment. It's from this interface that
@@ -25,7 +25,7 @@ namespace _300Messenger.Controllers
         // (see Create(MessageCreateViewModel) method)
         private readonly IWebHostEnvironment hostingEnvironment;
 
-        public MessageController(IMessageRepository repository,
+        public MessageSessionController(IMessageSessionRepository repository,
                                  IWebHostEnvironment hostingEnvironment)
         {
             this.messageRepository = repository;
@@ -54,7 +54,7 @@ namespace _300Messenger.Controllers
         // POST: Message/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(MessageCreateViewModel viewModel)
+        public ActionResult Create(MessageSessionCreateViewModel viewModel)
         {
             if(ModelState.IsValid)
             {
@@ -68,7 +68,7 @@ namespace _300Messenger.Controllers
                     uniqueFilenames.Remove(uniqueFilenames.Length - 1, 1);
                 }
                 
-                var message = messageRepository.CreateMessage(new Message() {
+                var message = messageRepository.CreateMessage(new MessageSession() {
                     Email = viewModel.Email,
                     Content = viewModel.Content,
                     ImagePaths = uniqueFilenames.Length > 0 ? uniqueFilenames.ToString() : null

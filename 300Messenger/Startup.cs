@@ -35,7 +35,7 @@ namespace _300Messenger
             // inject the In-Memory Repository. Uncomment AddScoped for the Database
             // Repository
             //services.AddSingleton<IMessageRepository, MockMessageRepository>();
-            services.AddScoped<IMessageRepository, SQLMessageRepository>();
+            services.AddScoped<IMessageSessionRepository, SQLMessageRepository>();
         }
         /// <summary> 
         /// Method configures the HTTP request pipeline. Middleware is adjusted here.

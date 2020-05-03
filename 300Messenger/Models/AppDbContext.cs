@@ -11,6 +11,8 @@ namespace _300Messenger.Models
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         { }
 
-        public DbSet<Message> Messages { get; set; }
+        public DbSet<MessageSession> MessageSessions { get; set; }
+
+        public DbSet<IMessage> Messages { get; set; }
     }
 }
