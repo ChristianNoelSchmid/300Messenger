@@ -13,6 +13,6 @@ namespace _300Messenger.Models
 
         public DbSet<MessageSession> MessageSessions { get; set; }
 
-        public DbSet<IMessage> Messages { get; set; }
+        public DbSet<Message> Messages { get; set; }
     }
 }

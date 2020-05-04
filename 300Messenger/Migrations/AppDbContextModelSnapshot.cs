@@ -26,16 +26,47 @@ namespace _300Messenger.Migrations
                         .IsRequired()
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
+                    b.Property<int>("MessageSessionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageSessionId");
+
+                    b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("_300Messenger.Models.MessageSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("ImagePaths")
+                    b.Property<string>("Title")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Messages");
+                    b.ToTable("MessageSessions");
+                });
+
+            modelBuilder.Entity("_300Messenger.Models.Message", b =>
+                {
+                    b.HasOne("_300Messenger.Models.MessageSession", "Session")
+                        .WithMany("Messages")
+                        .HasForeignKey("MessageSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

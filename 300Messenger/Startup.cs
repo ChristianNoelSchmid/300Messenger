@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using _300Messenger.Models;
+using _300Messenger.Models.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -34,8 +35,10 @@ namespace _300Messenger
             // The Dependency Injection Methods - Uncomment the AddSingleton method to
             // inject the In-Memory Repository. Uncomment AddScoped for the Database
             // Repository
-            //services.AddSingleton<IMessageRepository, MockMessageRepository>();
-            services.AddScoped<IMessageSessionRepository, SQLMessageRepository>();
+            //services.AddSingleton<IMessageSessionRepository, MockMessageSessionRepository>();
+            //services.AddSingleton<IMessageRepository, MockMessageRepository>()
+            services.AddScoped<IMessageSessionRepository, SQLMessageSessionRepository>();
+            services.AddScoped<IMessageRepository, SQLMessageRepository>();
         }
         /// <summary> 
         /// Method configures the HTTP request pipeline. Middleware is adjusted here.
