@@ -62,7 +62,7 @@ namespace _300Messenger.Migrations
 
             modelBuilder.Entity("_300Messenger.Models.Message", b =>
                 {
-                    b.HasOne("_300Messenger.Models.MessageSession", "Session")
+                    b.HasOne("_300Messenger.Models.MessageSession", null)
                         .WithMany("Messages")
                         .HasForeignKey("MessageSessionId")
                         .OnDelete(DeleteBehavior.Cascade)

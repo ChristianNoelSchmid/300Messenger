@@ -1,5 +1,6 @@
 using _300Messenger.Models;
 using _300Messenger.Models.Repositories;
+using _300Messenger.ViewModels;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +17,22 @@ namespace _300Messenger.Controllers
             this.hostEnvironment = environment;
         }
 
-        public ActionResult Create(MessageSession session, )
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CreateText(MessageSessionAddMessageViewModel viewModel)
+        {
+            if(ModelState.IsValid)
+            {
+                messageRepository.CreateMessage(
+                    new Message() {
+                        MessageSessionId = viewModel.Session.Id,
+                        Type = viewModel.Type,
+                        Content = viewModel.Content,
+                    }
+                );
+            }
+
+            return RedirectToAction("Details", "MessageSession", new { id = viewModel.Session.Id });
+        }
     }
 }
