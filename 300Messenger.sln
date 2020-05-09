@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "300Messenger", "300Messenger\300Messenger.csproj", "{A770C2C1-3B6B-44CF-A39C-13F53E1954F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Authorization", "Authorization\Authorization.csproj", "{53715C21-8D15-47B7-8BF2-4BD4C176DAD1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Authentication", "Authentication\Authentication.csproj", "{53715C21-8D15-47B7-8BF2-4BD4C176DAD1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{84722D91-C363-4F9C-86B0-74E5D7200290}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{53715C21-8D15-47B7-8BF2-4BD4C176DAD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53715C21-8D15-47B7-8BF2-4BD4C176DAD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53715C21-8D15-47B7-8BF2-4BD4C176DAD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84722D91-C363-4F9C-86B0-74E5D7200290}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84722D91-C363-4F9C-86B0-74E5D7200290}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84722D91-C363-4F9C-86B0-74E5D7200290}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84722D91-C363-4F9C-86B0-74E5D7200290}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

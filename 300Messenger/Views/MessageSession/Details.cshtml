@@ -1,0 +1,43 @@
+﻿@model MessageSessionAddMessageViewModel
+
+@{
+    ViewData["Title"] = $"From {Model.Session.Email}";
+}
+
+<div class="container">
+    <h1>@Model.Session.Email</h1>
+    @if(Model.Session.Title != null)
+    {
+        <p>@Model.Session.Title</p>
+    }
+    @if(Model.Session.Description != null)
+    {
+        <p>@Model.Session.Description</p>
+    }
+    @if(Model.Session.Messages != null)
+    {
+        @foreach(Message message in Model.Session.Messages)
+        {
+            <p>message.Content</p>
+        } 
+    }
+    
+    <form enctype="multipart/form-data" 
+        asp-controller="Message" asp-action="CreateText" method="post">  
+        <div class="form-group">
+            <label asp-for="Content" class="col-md-2 control-label">New Message</label>
+            <div class="col-md-10">
+                <input asp-for="Content" class="form-control" />
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+        </div>
+        <!--<div asp-validation-summary="All" class="text-danger"></div>-->
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <button class="btn btn-primary">Add Message</button>
+            </div>
+        </div>
+    </form>
+    <a class="btn btn-primary" asp-controller="MessageSession" asp-action="Edit" asp-route-id="@Model.Session.Id">Edit Session</a>
+    <a class="btn btn-danger" asp-controller="MessageSession" asp-action="Delete" asp-route-id="@Model.Session.Id">Delete Session</a>
+</div>

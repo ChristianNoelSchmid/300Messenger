@@ -1,0 +1,18 @@
+﻿@model IEnumerable<MessageSession>
+
+@{
+    ViewData["Title"] = "Messages";
+}
+
+@foreach (var message in Model)
+{
+    var cutContent = message.Description.Length > 20 ? $"{message.Description.Substring(0, 20)}..." : message.Description;
+    <p>@message.Email:
+        <a asp-controller="MessageSession" asp-action="Details" asp-route-id="@message.Id">
+            @message.Title
+    </a> - @cutContent</p>
+    <hr>
+}
+<div>
+    <h5><a asp-controller="MessageSession" asp-action="Create">Post New Message</a></h5>
+</div>
