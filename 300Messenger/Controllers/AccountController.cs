@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using _300Messenger.Shared;
+using _300Messenger.Shared.ViewModels;
 using _300Messenger.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

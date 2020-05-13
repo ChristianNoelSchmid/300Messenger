@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace _300Messenger.Shared
+namespace _300Messenger.Shared.ViewModels
 {
     public class LoginViewModel
     {

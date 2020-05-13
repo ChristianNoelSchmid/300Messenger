@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
-using _300Messenger.Shared;
 using Microsoft.AspNetCore.Mvc;
 using _300Messenger.Authentication.Models;
 using _300Messenger.Authentication.Services;
@@ -12,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Linq;
 using System.Security.Claims;
 using System;
+using _300Messenger.Shared.ViewModels;
 
 namespace _300Messenger.Authentication.Controllers
 {
@@ -47,7 +47,8 @@ namespace _300Messenger.Authentication.Controllers
                     FirstName = viewModel.FirstName,
                     LastName = viewModel.LastName,
                     UserName = viewModel.Email,
-                    Email = viewModel.Email
+                    Email = viewModel.Email,
+                    EmailConfirmed = false
                 };
 
                 var result = await userManager.CreateAsync(user, viewModel.Password);
@@ -55,7 +56,7 @@ namespace _300Messenger.Authentication.Controllers
                 if(result.Succeeded)
                 {
                     logger.LogInformation($"User created: {user.UserName}");
-                    return Ok(tokenBuilder.BuildToken(user.FirstName, user.LastName, user.Email));
+                    return Ok(tokenBuilder.BuildToken(user.Email));
                 }
 
                 foreach(var error in result.Errors)
@@ -86,13 +87,13 @@ namespace _300Messenger.Authentication.Controllers
                 {
                     if(!user.EmailConfirmed)
                     {
-                        return BadRequest("Please confirm email before proceeding");
+                        return Unauthorized("Please confirm email before proceeding");
                     }
                     var result = hasher.VerifyHashedPassword(user, user.PasswordHash, viewModel.Password);
                     if(result == PasswordVerificationResult.Success)
                     {
                         logger.LogInformation($"User JWT accessed: {user.Email}");
-                        return Ok(tokenBuilder.BuildToken(user.FirstName, user.LastName, user.Email));
+                        return Ok(tokenBuilder.BuildToken(user.Email));
                     }
                 }
             }
@@ -134,6 +135,8 @@ namespace _300Messenger.Authentication.Controllers
             // Retrieve the single claim from the JWT (Email)
             var email = User.Claims.SingleOrDefault();
 
+            logger.LogInformation(email.Value.ToString());
+
             if(email == null)
             {
                 return Unauthorized("Validation Error");
@@ -144,8 +147,12 @@ namespace _300Messenger.Authentication.Controllers
             {
                 return Unauthorized("The specified User Could not be found");
             }
+            if(!user.EmailConfirmed)
+            {
+                return Unauthorized("Please confirm email address before proceeding");
+            }
 
-            return NoContent();
+            return Ok(user.Email);
         }
     }
 }

@@ -4,20 +4,22 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using _300Messenger.Authentication.Models;
-using _300Messenger.Authentication.Services;
+using _300Messenger.Friendships.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
-namespace _300Messenger.Authentication
+using Pomelo.EntityFrameworkCore.MySql;
+
+namespace _300Messenger.Friendships
 {
     public class Startup
     {
@@ -33,40 +35,13 @@ namespace _300Messenger.Authentication
         {
             services.AddControllers();
 
-            services.AddIdentity<User, IdentityRole>()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
-
             services.AddDbContextPool<AppDbContext>(options =>
                 options.UseMySql(Configuration.GetConnectionString("DefaultConnection"))
             );
 
-            // Set JWT Authentication Services
-            services.AddAuthentication(
-                options => 
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                }
-            ).AddJwtBearer(
-                cfg =>
-                {
-                    cfg.RequireHttpsMetadata = true;
-                    cfg.SaveToken = true;
-                    cfg.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
-                    {
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("what1sth3k1nd3stth1ngthatha53v3rb33nsa1dt0y0uf0rm31t1sthat1msaf3")),
-                        ValidateAudience = false,
-                        ValidateIssuer = false,
-                        ValidateLifetime = false,
-                        RequireExpirationTime = false,
-                        ClockSkew = TimeSpan.Zero,
-                        ValidateIssuerSigningKey = true
-                    };
-                }
-            );
+            services.AddHttpClient();
 
-            services.AddScoped<ITokenBuilder, TokenBuilder>();
+            services.AddScoped<IFriendshipRepo, FriendshipRepo>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

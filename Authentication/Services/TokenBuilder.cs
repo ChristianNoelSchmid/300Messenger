@@ -7,7 +7,7 @@ namespace _300Messenger.Authentication.Services
 {
     public class TokenBuilder : ITokenBuilder
     {
-        public string BuildToken(string first, string last, string email)
+        public string BuildToken(string email)
         {
             var signingKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(
