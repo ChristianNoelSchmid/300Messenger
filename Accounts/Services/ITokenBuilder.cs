@@ -1,4 +1,4 @@
-namespace _300Messenger.Authentication.Services
+namespace _300Messenger.Accounts.Services
 {
     public interface ITokenBuilder
     {

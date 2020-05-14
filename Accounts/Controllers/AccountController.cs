@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
 using Microsoft.AspNetCore.Mvc;
-using _300Messenger.Authentication.Models;
-using _300Messenger.Authentication.Services;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,10 +10,12 @@ using System.Linq;
 using System.Security.Claims;
 using System;
 using System.Collections.Generic;
-using _300Messenger.Authentication.ViewModels;
 using System.Net.Http;
+using _300Messenger.Accounts.Services;
+using _300Messenger.Accounts.Models;
+using _300Messenger.Accounts.ViewModels;
 
-namespace _300Messenger.Authentication.Controllers
+namespace _300Messenger.Accounts.Controllers
 {
     [ApiController]
     [Route("[controller]")]
@@ -56,7 +56,7 @@ namespace _300Messenger.Authentication.Controllers
                     FirstName = viewModel.FirstName,
                     LastName = viewModel.LastName,
                     UserName = viewModel.Email,
-                    Email = viewModel.Email,
+                    Email = viewModel.Email.ToLower(),
                     EmailConfirmed = false
                 };
 

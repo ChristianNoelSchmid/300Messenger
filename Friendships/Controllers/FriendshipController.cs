@@ -70,7 +70,7 @@ namespace _300Messenger.Friendships.Controllers
 
         [HttpGet]
         [Route("GetFriendships")]
-        public async Task<IActionResult> GetFriendships(JWTViewModel viewModel)
+        public async Task<IActionResult> GetFriendships(JwtViewModel viewModel)
         {
             if(ModelState.IsValid)
             {

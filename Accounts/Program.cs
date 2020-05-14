@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace _300Messenger.Authentication
+namespace _300Messenger.Accounts
 {
     public class Program
     {

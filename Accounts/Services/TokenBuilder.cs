@@ -3,7 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace _300Messenger.Authentication.Services
+namespace _300Messenger.Accounts.Services
 {
     public class TokenBuilder : ITokenBuilder
     {

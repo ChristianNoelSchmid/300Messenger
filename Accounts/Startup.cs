@@ -4,8 +4,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using _300Messenger.Authentication.Models;
-using _300Messenger.Authentication.Services;
+using _300Messenger.Accounts.Models;
+using _300Messenger.Accounts.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -18,7 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
-namespace _300Messenger.Authentication
+namespace _300Messenger.Accounts
 {
     public class Startup
     {

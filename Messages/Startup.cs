@@ -1,26 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
-using _300Messenger.Friendships.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using _300Messenger.Messages.Models;
+using _300Messenger.Messages.Models.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 
-using Pomelo.EntityFrameworkCore.MySql;
-
-namespace _300Messenger.Friendships
+namespace _300Messenger.Messages
 {
     public class Startup
     {
@@ -42,10 +35,16 @@ namespace _300Messenger.Friendships
                 options.UseMySql(Configuration.GetConnectionString("DefaultConnection"))
             );
 
-            services.AddScoped<IFriendshipRepo, FriendshipRepo>();
+            // The Dependency Injection Methods - Uncomment the AddSingleton method to
+            // inject the In-Memory Repository. Uncomment AddScoped for the Database
+            // Repository
+            //services.AddSingleton<IMessageSessionRepository, MockMessageSessionRepository>();
+            //services.AddSingleton<IMessageRepository, MockMessageRepository>()
+            services.AddScoped<IMessageSessionRepository, SQLMessageSessionRepository>();
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary> 
+        /// Method configures the HTTP request pipeline. Middleware is adjusted here.
+        /// </summary>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
