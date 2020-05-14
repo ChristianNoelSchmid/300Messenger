@@ -27,10 +27,7 @@ namespace _300Messenger
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
-
-            services.AddIdentity<IdentityUser, IdentityRole>()
-                .AddEntityFrameworkStores<AppDbContext>();
+            services.AddControllers();
 
             services.AddDbContextPool<AppDbContext>(options =>
                 options.UseMySql(Configuration.GetConnectionString("DefaultConnection"))

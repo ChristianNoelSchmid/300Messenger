@@ -13,20 +13,34 @@ namespace _300Messenger.Shared.Services
     /// </summary>
     public static class Authorization
     {
-        public static HttpClient CreateVerificationClient(IHttpClientFactory clientFactory)
+        private static HttpClient verifyClient;
+        public static async Task<string> VerifyToken(IHttpClientFactory clientFactory, string token)
         {
-            var client = clientFactory.CreateClient();
-            client.BaseAddress = new Uri("https://localhost:5005/Account/Verify");
-            return client;
-        }
-        public static async Task<string> VerifyToken(HttpClient verifyClient, string token)
-        {
-            verifyClient.DefaultRequestHeaders.Add("Authorization", "bearer " + token);
-
-            var response =  await verifyClient.GetAsync("");
-            if(response.StatusCode == HttpStatusCode.OK)
+            using(HttpClientHandler handler = new HttpClientHandler())
             {
-                return await response.Content.ReadAsStringAsync();
+                // Retrieve the Environment Variable for ASP.NET Core's 
+                // Environment mode
+                // If it's under 'Development', allow all SSL connections to
+                // avoid connections issues.
+                var mode = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                if(mode == "Development")
+                {
+                    handler.ServerCertificateCustomValidationCallback = 
+                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+                }
+
+                var verifyURI = Environment.GetEnvironmentVariable("JWTTOKEN_VERIFICATION_URI");
+                verifyClient = new HttpClient(handler);
+                verifyClient.BaseAddress = new Uri(verifyURI);
+
+                verifyClient.DefaultRequestHeaders.Authorization = 
+                    new AuthenticationHeaderValue("bearer", token);
+                    
+                var response =  await verifyClient.GetAsync("");
+                if(response.StatusCode == HttpStatusCode.OK)
+                {
+                    return await response.Content.ReadAsStringAsync();
+                }
             }
 
             return null;

@@ -11,7 +11,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Linq;
 using System.Security.Claims;
 using System;
-using _300Messenger.Shared.ViewModels;
+using System.Collections.Generic;
+using _300Messenger.Authentication.ViewModels;
+using System.Net.Http;
 
 namespace _300Messenger.Authentication.Controllers
 {
@@ -21,6 +23,7 @@ namespace _300Messenger.Authentication.Controllers
     {
         private readonly UserManager<User> userManager;
         private readonly ITokenBuilder tokenBuilder;
+        private readonly IHttpClientFactory clientFactory;
         private readonly ILogger<AccountController> logger;
 
         /// <summary> Used to compare provided Passwords with User Passwords </summary>
@@ -28,10 +31,16 @@ namespace _300Messenger.Authentication.Controllers
 
         public AccountController(UserManager<User> userManager,
                                  ITokenBuilder tokenBuilder,
+                                 IHttpClientFactory clientFactory,
                                  ILogger<AccountController> logger)
         {
+            ServicePointManager
+                .ServerCertificateValidationCallback += 
+                (sender, cert, chain, sslPolicyErrors) => true;
+
             this.userManager = userManager;
             this.tokenBuilder = tokenBuilder;
+            this.clientFactory = clientFactory;
             this.logger = logger;
             this.hasher = new PasswordHasher<User>();
         }
@@ -69,7 +78,7 @@ namespace _300Messenger.Authentication.Controllers
                 }
             }
 
-            return ValidationProblem();
+            return ValidationProblem(ModelState);
         }
 
         /// <summary>
@@ -97,7 +106,7 @@ namespace _300Messenger.Authentication.Controllers
                     }
                 }
             }
-            return BadRequest();
+            return BadRequest(ModelState);
         }
 
         /// <summary>
@@ -118,9 +127,9 @@ namespace _300Messenger.Authentication.Controllers
                 user.EmailConfirmed = true;
                 await userManager.UpdateAsync(user);
 
-                return NoContent();
+                return Ok();
             }
-            return BadRequest();
+            return BadRequest(ModelState);
         }
 
         /// <summary>
@@ -132,10 +141,9 @@ namespace _300Messenger.Authentication.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> VerifyToken()
         {
+            logger.LogInformation("Connection Established...");
             // Retrieve the single claim from the JWT (Email)
             var email = User.Claims.SingleOrDefault();
-
-            logger.LogInformation(email.Value.ToString());
 
             if(email == null)
             {
@@ -153,6 +161,43 @@ namespace _300Messenger.Authentication.Controllers
             }
 
             return Ok(user.Email);
+        }
+
+        [HttpGet]
+        [Route("GetUsers")]
+        public async Task<IActionResult> GetUsers(AuthorizedQueryViewModel viewModel)
+        {
+            var values = new List<string>();
+            var query = viewModel.Value;
+
+            var fromEmail = 
+                await _300Messenger.Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.JwtFrom);
+
+            if(fromEmail != null)
+            {
+                if(query != null)
+                {
+                    query = query.ToLower();
+                    values.AddRange(query.Split(' ', '\t', '\n'));
+                    for(int i = values.Count - 1; i >= 0; i -= 1)
+                    {
+                        if(values[i].IndexOf(',') != -1) 
+                        {
+                            values.AddRange(values[i].Split(','));
+                            values.RemoveAt(i);
+                        }
+                    }
+                }
+                return new JsonResult(
+                    userManager.Users.Where(
+                        u =>
+                            values.Contains(u.Email.ToLower()) 
+                        || values.Contains(u.FirstName.ToLower())
+                        || values.Contains(u.LastName.ToLower())
+                    )
+                );
+            }
+            return BadRequest("User token not authorized.");
         }
     }
 }

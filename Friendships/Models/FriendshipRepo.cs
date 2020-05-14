@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace _300Messenger.Friendships.Models
 {
@@ -13,11 +14,11 @@ namespace _300Messenger.Friendships.Models
             this.dbContext = dbContext;
         }
 
-        public async Task<Friendship> AddUnconfirmedFriendship(string from, string to)
+        public async Task<Friendship> AddUnconfirmedFriendship(string requesterEmail, string confirmerEmail)
         {
             var friendship = new Friendship() {
-                FromEmail = from,
-                ToEmail = to,
+                RequesterEmail = requesterEmail,
+                ConfirmerEmail = confirmerEmail,
                 IsConfirmed = false
             };
 
@@ -29,9 +30,14 @@ namespace _300Messenger.Friendships.Models
             return friendship;
         }
 
-        public async Task<Friendship> ConfirmFriendship(int id)
+        public async Task<Friendship> ConfirmFriendship(string requesterEmail, string confirmerEmail)
         {
-            var friendship = await dbContext.Friendships.FindAsync(id);
+            var friendship = await dbContext.Friendships
+                .FirstOrDefaultAsync(
+                    f => 
+                    f.RequesterEmail == requesterEmail && f.ConfirmerEmail == confirmerEmail
+                );
+
             if(friendship != null)
             {
                 friendship.IsConfirmed = true;
@@ -41,10 +47,10 @@ namespace _300Messenger.Friendships.Models
             return friendship;
         }
 
-        public IEnumerable<Friendship> GetAllConfirmedFriendships(string fromEmail)
+        public IEnumerable<Friendship> GetAllFriendships(string fromEmail)
         {
             return dbContext.Friendships.Where(
-                f => (f.FromEmail == fromEmail || f.ToEmail == fromEmail) && f.IsConfirmed 
+                f => f.RequesterEmail == fromEmail || f.ConfirmerEmail == fromEmail
             );
         }
 

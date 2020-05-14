@@ -7,7 +7,7 @@ namespace _300Messenger.Friendships.Models
     {
         Task<Friendship> AddUnconfirmedFriendship(string from, string to);
         Task<Friendship> RemoveFriendship(int id);
-        Task<Friendship> ConfirmFriendship(int id);
-        IEnumerable<Friendship> GetAllConfirmedFriendships(string from);
+        Task<Friendship> ConfirmFriendship(string requesterEmail, string confirmerEmail);
+        IEnumerable<Friendship> GetAllFriendships(string fromEmail);
     }
 }

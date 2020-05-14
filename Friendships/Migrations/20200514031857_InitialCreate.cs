@@ -14,8 +14,8 @@ namespace Friendships.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     IsConfirmed = table.Column<bool>(nullable: false),
-                    FromEmail = table.Column<string>(nullable: true),
-                    ToEmail = table.Column<string>(nullable: true)
+                    RequesterEmail = table.Column<string>(nullable: true),
+                    ConfirmerEmail = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {

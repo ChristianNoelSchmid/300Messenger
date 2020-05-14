@@ -9,7 +9,7 @@ using _300Messenger.Authentication;
 namespace Authentication.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20200513013110_InitialCreate")]
+    [Migration("20200514031847_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

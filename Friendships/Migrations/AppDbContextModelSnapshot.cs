@@ -22,13 +22,13 @@ namespace Friendships.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("FromEmail")
+                    b.Property<string>("ConfirmerEmail")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<bool>("IsConfirmed")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("ToEmail")
+                    b.Property<string>("RequesterEmail")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.HasKey("Id");
