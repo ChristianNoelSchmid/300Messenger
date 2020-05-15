@@ -13,6 +13,7 @@ namespace _300Messenger.Shared.Services
     /// </summary>
     public static class Authorization
     {
+        public const string SECRET = "a_d3rpy_f1uffy_c0rg1";
         private static HttpClient verifyClient;
         public static async Task<string> VerifyToken(IHttpClientFactory clientFactory, string token)
         {

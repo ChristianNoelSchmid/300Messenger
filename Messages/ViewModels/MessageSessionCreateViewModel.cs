@@ -7,6 +7,9 @@ namespace _300Messenger.Messages.ViewModels
     {
         [Required]
         public string FromJwt { get; set; }
+        
+        [Required]
+        public string Secret { get; set; }
 
         [Required]
         [StringLength(100)]

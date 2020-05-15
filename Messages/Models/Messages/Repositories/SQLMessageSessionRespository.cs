@@ -30,7 +30,6 @@ namespace _300Messenger.Messages.Models.Repositories
                     throw new EmailNotAssociatedWithMessageSessionException();
                 }
                 await dbContext.Messages.AddAsync(message);
-                session.Messages.Add(message);
                 await dbContext.SaveChangesAsync();
             }
 
@@ -93,7 +92,6 @@ namespace _300Messenger.Messages.Models.Repositories
                     throw new EmailNotAssociatedWithMessageSessionException();
                 } 
             }
-            session.Messages = new List<Message>(dbContext.Messages.Where(m => m.MessageSessionId == id));
 
             return session;
         }
@@ -101,8 +99,62 @@ namespace _300Messenger.Messages.Models.Repositories
         public IEnumerable<MessageSession> GetMessageSessions(string email)
         {
             return dbContext.MessageSessions.Where(
-                ms => ms.Emails.Split().Contains(email)
+                ms =>  ms.Emails.Contains(email)
             );
+        }
+
+        public async Task<IEnumerable<Message>> GetMessagesForSessionAsync(int id, string requesterEmail)
+        {
+            var session = await dbContext.MessageSessions.FindAsync(id);
+
+            if(session != null)
+            {
+                if(!session.Emails.Split(';').Contains(requesterEmail))
+                {
+                    throw new EmailNotAssociatedWithMessageSessionException();
+                }
+                return  dbContext.Messages.Where(m => m.MessageSessionId == id);
+            }
+
+            return null;
+        }
+
+        public async Task<MessageSession> RemoveUsersFromSessionAsync(int id, string requesterEmail, string[] usersToRemoveEmails)
+        {
+            var session = await dbContext.MessageSessions.FindAsync(id);   
+            if(session != null)
+            {
+                if(!session.Emails.StartsWith(requesterEmail))
+                {
+                    throw new EmailDoesNotMatchMessageSessionOwnerException();
+                }
+                
+                var emailList = new List<string>(session.Emails.Split(';'));
+                foreach(var userEmail in usersToRemoveEmails)
+                {
+                    emailList.Remove(userEmail);
+                }
+                session.Emails = string.Join(';', emailList);
+                await dbContext.SaveChangesAsync();
+            }
+
+            return session;
+        }
+
+        public async Task<string[]> GetSessionUsersAsync(int id, string requesterEmail)
+        {
+            var session = await dbContext.MessageSessions.FindAsync(id); 
+            if(session != null)
+            {
+                if(!session.Emails.Contains(requesterEmail))
+                {
+                    throw new EmailNotAssociatedWithMessageSessionException();
+                }
+
+                return session.Emails.Split(';');
+            }
+
+            return null;
         }
     }
 }

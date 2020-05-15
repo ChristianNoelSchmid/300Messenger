@@ -36,16 +36,5 @@ namespace _300Messenger.Messages.Models
         [Required(ErrorMessage="Please enter your email address")]
         [EmailAddress(ErrorMessage="Please enter a valid email address")]
         public string Emails { get; set; }
-
-        /*
-         * MessageSession to Message Table Relationship
-         * Properties
-         */
-        /// <summary>
-        /// The Messages associated with the MessageSession.
-        /// A One-To-Many Relationship.
-        /// TODO -- Offload images onto seperate server for better
-        ///      application security
-        public List<Message> Messages { get; set; }
     }
 }

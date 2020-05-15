@@ -63,13 +63,39 @@ namespace _300Messenger.Messages.Controllers
             }
             return BadRequest(ModelState);
         }
-        
-        [HttpPost]
-        [Route("Create")]
-        public async Task<IActionResult> Create(MessageSessionCreateViewModel viewModel)
+
+        [HttpGet]
+        [Route("GetSessions")]
+        public async Task<IActionResult> GetUserSessions(AuthorizedJwtViewModel viewModel)
         {
             if(ModelState.IsValid)
             {
+                var fromEmail = 
+                    await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
+
+                if(fromEmail != null)
+                {
+                    return Ok(
+                        sessionRepository.GetMessageSessions(fromEmail) 
+                    );
+                }
+            }
+            return BadRequest(ModelState);
+        }
+
+        [HttpPost]
+        [Route("CreateSession")]
+        public async Task<IActionResult> CreateSession(MessageSessionCreateViewModel viewModel)
+        {
+            if(ModelState.IsValid)
+            {
+                // Check status of SECRET to ensure that emails are added
+                // from a valid source
+                if(viewModel.Secret != Shared.Services.Authorization.SECRET)
+                {
+                    return BadRequest("Secret not matched.");
+                }
+
                 var fromEmail = 
                     await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
 
@@ -79,9 +105,13 @@ namespace _300Messenger.Messages.Controllers
                     {
                         Title = viewModel.Title,
                         Description = viewModel.Description,
-                        Emails = string.Join(';', viewModel.Emails).ToLower(),
-                        Messages = new List<Message>(),
+                        Emails = fromEmail
                     };
+
+                    if(viewModel.Emails != null)
+                    {
+                        session.Emails += ";" + string.Join(';', viewModel.Emails).ToLower();
+                    }
 
                     await sessionRepository.CreateMessageSessionAsync(session);
                     return Ok(session);
@@ -93,8 +123,8 @@ namespace _300Messenger.Messages.Controllers
         }
 
         [HttpPost] 
-        [Route("Delete")]
-        public async Task<IActionResult> Delete(AuthorizedIntViewModel viewModel)
+        [Route("DeleteSession")]
+        public async Task<IActionResult> DeleteSession(AuthorizedIntViewModel viewModel)
         {
             if(ModelState.IsValid)
             {
@@ -105,7 +135,11 @@ namespace _300Messenger.Messages.Controllers
                 {
                     try
                     {
-                        await sessionRepository.DeleteMessageSessionAsync(viewModel.Value, fromEmail);
+                        var session = await sessionRepository.DeleteMessageSessionAsync(viewModel.Value, fromEmail);
+                        if(session == null)
+                        {
+                            return BadRequest("Session does not exist.");
+                        }
                         return Ok();
                     }
                     catch(EmailDoesNotMatchMessageSessionOwnerException) 
@@ -117,13 +151,46 @@ namespace _300Messenger.Messages.Controllers
 
             return BadRequest(ModelState);
         }
-    
-        [HttpPatch] 
-        [Route("AddEmails")]
-        public async Task<IActionResult> IncludeEmails(MessageSessionAddUsersViewModel viewModel)
+
+        [HttpGet]
+        [Route("GetSessionUsers")]
+        public async Task<IActionResult> GetSessionUsers(AuthorizedIntViewModel viewModel)
         {
             if(ModelState.IsValid)
             {
+                var fromEmail = 
+                    await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
+
+                if(fromEmail != null)
+                {
+                    try
+                    {
+                        return Ok(
+                            await sessionRepository.GetSessionUsersAsync(viewModel.Value, fromEmail)
+                        );
+                    }
+                    catch(EmailNotAssociatedWithMessageSessionException)
+                    {
+                        return BadRequest("User must be associated with session to get users");
+                    }
+                }
+            }
+            return BadRequest(ModelState);
+        }
+
+        [HttpPatch] 
+        [Route("AddUsersToSession")]
+        public async Task<IActionResult> AddUsersToSession(MessageSessionAddRemoveUsersViewModel viewModel)
+        {
+            if(ModelState.IsValid)
+            {
+                // Check status of SECRET to ensure that emails are added
+                // from a valid source
+                if(viewModel.Secret != Shared.Services.Authorization.SECRET)
+                {
+                    return BadRequest("Secret not matched.");
+                }
+
                 var fromEmail = 
                     await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
 
@@ -142,9 +209,37 @@ namespace _300Messenger.Messages.Controllers
             }
             return BadRequest(ModelState);
         }
-    
+
         [HttpPatch]
-        [Route("AddMessage")] 
+        [Route("RemoveUsersFromSession")]
+        public async Task<IActionResult> RemoveUsersFromSession(MessageSessionAddRemoveUsersViewModel viewModel)
+        {
+            if(ModelState.IsValid)
+            {
+                var fromEmail = 
+                    await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
+
+                if(fromEmail != null)
+                {
+                    try
+                    {
+                        return Ok (
+                                await sessionRepository.RemoveUsersFromSessionAsync(
+                                viewModel.SessionId, fromEmail, viewModel.Values
+                            )
+                        );
+                    }
+                    catch(EmailDoesNotMatchMessageSessionOwnerException)
+                    {
+                        return BadRequest("Only session owners can remove users from a session");
+                    }
+                }
+            }
+            return BadRequest(ModelState);
+        }
+
+        [HttpPatch]
+        [Route("AddMessageToSession")] 
         public async Task<IActionResult> AddMessageToSession(MessageSessionAddMessageViewModel viewModel)
         {
             if(ModelState.IsValid)
@@ -177,5 +272,34 @@ namespace _300Messenger.Messages.Controllers
             }
             return BadRequest(ModelState);
         }
+
+        [HttpGet]
+        [Route("GetMessagesFromSession")]
+        public async Task<IActionResult> GetMessagesForSession(AuthorizedIntViewModel viewModel)
+        {
+            if(ModelState.IsValid)
+            {
+                var fromEmail = 
+                    await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
+
+                if(fromEmail != null)
+                {
+                    try
+                    {
+                        return Ok(
+                            await sessionRepository.GetMessagesForSessionAsync(
+                                viewModel.Value,
+                                fromEmail
+                            )
+                        );
+                    }
+                    catch(EmailNotAssociatedWithMessageSessionException)
+                    {
+                        return BadRequest("User must be associated with message session to see messages.");
+                    }
+                }
+            }
+            return BadRequest(ModelState);
+        }        
     }
 }
