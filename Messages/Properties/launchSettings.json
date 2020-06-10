@@ -22,7 +22,7 @@
       "commandName": "Project",
       "launchUrl": "300Messenger - Messages",
       "environmentVariables": {
-        "JWTTOKEN_VERIFICATION_URI": "https://localhost:5005/Account/Verify",
+        "JWTTOKEN_VERIFICATION_URI": "https://0.0.0.0:5005/Account/Verify",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "https://0.0.0.0:5003"

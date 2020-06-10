@@ -16,8 +16,8 @@ namespace Mobile.WebApi
         internal static Dictionary<string, string> ServerUriRoutes = new Dictionary<string, string>
         {
             { "Accounts", "https://52.12.195.150:5005/Account" },
-            { "Messages", "https://52.12.195.150:5003/MessageSession" },
-            { "Friendships", "https://52.12.195.150:5001/MessageSession" },
+            { "Friendships", "https://52.12.195.150:5003/Friendship" },
+            { "Messages", "https://52.12.195.150:5001/MessageSession" },
             { "Images", "https://52.12.195.150:5006/Image" }
         };
         public static HttpClientHandler CreateHandler()
