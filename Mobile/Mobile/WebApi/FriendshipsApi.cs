@@ -13,6 +13,7 @@ namespace Mobile.WebApi
     public static class FriendshipsApi
     {
         private static readonly HttpClient _client = new HttpClient(WebApiSettings.CreateHandler());
+        private static readonly string URI = WebApiSettings.ServerUriRoutes["Friendships"];
 
         public static async Task<ResponseResult<Friendship>> GetFriendship(string jwt, string email)
         {
@@ -40,7 +41,7 @@ namespace Mobile.WebApi
 
         public static async Task<ResponseResult<Friendship[]>> GetUserFriends(string jwt)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "https://10.0.2.2:5001/Friendship/GetFriendships");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{URI}/GetFriendships");
             var viewModel = new AuthorizedJwtViewModel { JwtFrom = jwt };
 
             request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");
@@ -61,7 +62,7 @@ namespace Mobile.WebApi
     
         public static async Task<ResponseResult> CreateFriendship(string jwt, string email)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://10.0.2.2:5001/Friendship/Create");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "{URI}/Create");
             var viewModel = new AuthorizedEmailViewModel { JwtFrom = jwt, Email = email };
 
             request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");
@@ -77,7 +78,7 @@ namespace Mobile.WebApi
 
         public static async Task<ResponseResult> RemoveFriendship(string jwt, int id)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://10.0.2.2:5001/Friendship/Remove");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "{URI}/Remove");
             var viewModel = new AuthorizedIntViewModel { JwtFrom = jwt, Value = id };
 
             request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");
@@ -93,7 +94,7 @@ namespace Mobile.WebApi
 
         public static async Task<ResponseResult> ConfirmFriendship(string jwt, int id)
         {
-            var request = new HttpRequestMessage(HttpMethod.Put, "https://10.0.2.2:5001/Friendship/Confirm");
+            var request = new HttpRequestMessage(HttpMethod.Put, "{URI}/Confirm");
             var viewModel = new AuthorizedIntViewModel { JwtFrom = jwt, Value = id };
 
             request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");
