@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 
-namespace _300Messenger.Images.ViewModels
+namespace Images.ViewModels
 {
     public class MessageImageViewModel
     {
@@ -13,5 +13,8 @@ namespace _300Messenger.Images.ViewModels
 
         [Required]
         public IFormFile FormFile { get; set; }
+
+        [Required]
+        public string Secret { get; set; }
     }
 }

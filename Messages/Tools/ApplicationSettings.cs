@@ -1,4 +1,4 @@
-namespace _300Messenger.Messages.Tools
+namespace Messages.Tools
 {
     public static class ApplicationSettings
     {

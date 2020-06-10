@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="Mobile.RegisterPage">
+    <ContentPage.Content>
+        <ScrollView>
+            <StackLayout VerticalOptions="Center" 
+                   Margin="20,60,20,20">
+                <Grid VerticalOptions="CenterAndExpand">
+                    <StackLayout x:Name="LayoutEntries">
+                        <Label FontSize="Large" Text="Register"
+                HorizontalOptions="Center"
+                FontAttributes="Bold" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Entry x:Name="FirstName"
+                       Placeholder="First Name"
+                       HeightRequest="50" />
+                            <Entry x:Name="LastName"
+                       Placeholder="Last Name"
+                       Grid.Column="1"
+                       HeightRequest="50" />
+                        </Grid>
+                        <Entry x:Name="Email"
+                Text="{Binding Email}"
+                Placeholder="Email"
+                HeightRequest="50" />
+                        <Entry x:Name="Password"
+                Placeholder="Password"
+                IsPassword="True"
+                HeightRequest="50" />
+                        <Entry x:Name="ConfirmPassword"
+                Placeholder="Confirm Password"
+                IsPassword="True"
+                HeightRequest="50" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button 
+                Text="Register"
+                Clicked="OnRegisterPressed" />
+                            <Button 
+                Grid.Column="1"
+                Text="Cancel" />
+                        </Grid>
+                        <Label Margin="0,30,0,0"
+                HorizontalOptions="Center"
+                FontSize="Large"
+                x:Name="ErrorCode"
+                Text=""
+                TextColor="Red" />
+                    </StackLayout>
+                    <StackLayout 
+                        x:Name="LayoutLoading"
+                        IsVisible="False">
+                        <ActivityIndicator
+                            x:Name="ActivityIndicatorRunning"
+                            Color="Orange"
+                            IsRunning="True" />
+                    </StackLayout>
+                </Grid>
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>

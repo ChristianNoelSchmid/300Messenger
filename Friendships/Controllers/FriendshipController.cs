@@ -2,85 +2,156 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using _300Messenger.Friendships.Models;
-using _300Messenger.Friendships.ViewModels;
+using Friendships.Exceptions;
+using Friendships.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Shared.Models;
+using Shared.ViewModels;
 
-namespace _300Messenger.Friendships.Controllers
+namespace Friendships.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     public class FriendshipController : Controller
     {
         private readonly IFriendshipRepo friendshipRepo;
-        private readonly IHttpClientFactory clientFactory;
-        private readonly ILogger<FriendshipController> logger;
+        private readonly IHttpClientFactory _clientFactory;
 
         public FriendshipController(IFriendshipRepo friendshipRepo, 
-            IHttpClientFactory clientFactory, ILogger<FriendshipController> logger)
+            IHttpClientFactory clientFactory)
         {
             this.friendshipRepo = friendshipRepo;
-            this.clientFactory = clientFactory;
-            this.logger = logger;
+            this._clientFactory = clientFactory;
         }
 
         [HttpPost]
         [Route("Create")]
-        public async Task<IActionResult> Create(FriendshipViewModel viewModel)
+        public async Task<IActionResult> Create(AuthorizedEmailViewModel viewModel)
         {
             if(ModelState.IsValid)
             {
                 // Ensure that the JWT refers to a User in the Repository, using
                 // the Accounts microservice
                 var fromEmail = 
-                    await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
+                    await Services.AuthorizationServices.VerifyToken(_clientFactory, viewModel.JwtFrom);
 
                 if(fromEmail != null)
                 {
-                    await friendshipRepo.AddUnconfirmedFriendship(fromEmail, viewModel.OtherEmail);
-                    return Ok();
+                    try
+                    {
+                        await friendshipRepo.AddUnconfirmedFriendshipAsync(fromEmail, viewModel.Email);
+                        return Ok();
+                    }
+                    catch(FriendshipAlreadyExistsException)
+                    {
+                        return BadRequest("Friendship already exists");
+                    }
                 }
             }
 
             return BadRequest(ModelState);
         }
 
-        [HttpPatch]
+        [HttpPut]
         [Route("Confirm")]
-        public async Task<IActionResult> Confirm(FriendshipViewModel viewModel)
+        public async Task<IActionResult> Confirm(AuthorizedIntViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                // In the case of confirmation, the JWT email is the user confirming the friendship
+                // rather than the requester (see method Create())
+                var fromEmail =
+                    await Services.AuthorizationServices.VerifyToken(_clientFactory, viewModel.JwtFrom);
+
+                if (fromEmail != null)
+                {
+                    try
+                    {
+                        var friendship = await friendshipRepo.ConfirmFriendshipAsync(viewModel.Value, fromEmail);
+                        return Ok();
+                    }
+                    catch (FriendshipDoesNotExistException)
+                    {
+                        return BadRequest("Friendship does not exist");
+                    }
+                    catch (UnauthorizedFriendConfirmException)
+                    {
+                        return BadRequest("Friendship cannot be authorized with token");
+                    }
+                }
+            }
+
+            return BadRequest(ModelState);
+        }
+
+        [HttpPost]
+        [Route("Remove")]
+        public async Task<IActionResult> Remove(AuthorizedIntViewModel viewModel)
         {
             if(ModelState.IsValid)
             {
                 // In the case of confirmation, the JWT email is the user confirming the friendship
                 // rather than the requester (see method Create())
                 var fromEmail = 
-                    await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
+                    await Services.AuthorizationServices.VerifyToken(_clientFactory, viewModel.JwtFrom);
 
-                var friendship = await friendshipRepo.ConfirmFriendship(viewModel.OtherEmail, fromEmail);
-                if(friendship == null)
+                if(fromEmail != null)
                 {
-                    return BadRequest("Friendship does not exist");
+                    try
+                    {
+                        await friendshipRepo.RemoveFriendshipAsync(viewModel.Value);
+                        return Ok();
+                    }
+                    catch(FriendshipDoesNotExistException)
+                    {
+                        return BadRequest("Friendship does not exist");
+                    }
                 }
-                return Ok();
             }
-
             return BadRequest(ModelState);
         }
 
         [HttpGet]
+        [Route("GetFriendship")]
+        public async Task<IActionResult> GetFriendship(AuthorizedEmailViewModel viewModel)
+        {
+            if(ModelState.IsValid)
+            {
+                var fromEmail =
+                    await Services.AuthorizationServices.VerifyToken(_clientFactory, viewModel.JwtFrom);
+
+                if(fromEmail != null)
+                {
+                    try
+                    {
+                        return Ok(JsonConvert.SerializeObject(
+                            await friendshipRepo.GetFriendship(fromEmail, viewModel.Email)
+                        ));
+                    }
+                    catch(FriendshipDoesNotExistException)
+                    {
+                        return BadRequest("Does Not Exist");
+                    }
+                }
+            }
+            return BadRequest();
+        }
+
+        [HttpGet]
         [Route("GetFriendships")]
-        public async Task<IActionResult> GetFriendships(JwtViewModel viewModel)
+        public async Task<IActionResult> GetFriendships(AuthorizedJwtViewModel viewModel)
         {
             if(ModelState.IsValid)
             {
                 var fromEmail = 
-                    await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
+                    await Services.AuthorizationServices.VerifyToken(_clientFactory, viewModel.JwtFrom);
 
                 if(fromEmail != null)
                 {
-                    return new JsonResult(
-                        friendshipRepo.GetAllFriendships(fromEmail)
+                    return Ok(
+                        JsonConvert.SerializeObject(friendshipRepo.GetAllFriendships(fromEmail))
                     );
                 }
             }

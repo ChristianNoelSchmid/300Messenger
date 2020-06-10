@@ -1,24 +1,18 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Text;
-using System.Threading.Tasks;
-using _300Messenger.Accounts.Models;
-using _300Messenger.Accounts.Services;
+using Accounts.Models;
+using Accounts.Tools;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Services;
 
-namespace _300Messenger.Accounts
+namespace Accounts
 {
     public class Startup
     {
@@ -36,13 +30,11 @@ namespace _300Messenger.Accounts
 
             services.AddHttpClient();
 
-            services.AddIdentity<User, IdentityRole>()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
-
             services.AddDbContextPool<AppDbContext>(options =>
                 options.UseMySql(Configuration.GetConnectionString("DefaultConnection"))
             );
+
+            services.AddScoped<IUserRepo, DbUserRepo>();
 
             // Set JWT Authentication Services
             services.AddAuthentication(
@@ -70,6 +62,8 @@ namespace _300Messenger.Accounts
             );
 
             services.AddScoped<ITokenBuilder, TokenBuilder>();
+            services.AddScoped<IMailService, MailService>();
+            services.AddScoped<IToConfirmRepo, DbToConfirmRepo>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

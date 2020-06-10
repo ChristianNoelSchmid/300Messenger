@@ -11,38 +11,136 @@ using System.Security.Claims;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using _300Messenger.Accounts.Services;
-using _300Messenger.Accounts.Models;
-using _300Messenger.Accounts.ViewModels;
+using Accounts.Models;
+using Accounts.Exceptions;
+using _300Messenger.Shared.ViewModels;
+using Services;
+using Accounts.Tools;
+using Shared.ViewModels;
+using Shared.Models;
+using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 
-namespace _300Messenger.Accounts.Controllers
+namespace Accounts.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     public class AccountController : Controller
     {
-        private readonly UserManager<User> userManager;
+        private readonly AppDbContext context;
+        private readonly IUserRepo userRepo;
+        private readonly IToConfirmRepo toConfirmRepo;
         private readonly ITokenBuilder tokenBuilder;
+        private readonly IMailService mailService;
         private readonly IHttpClientFactory clientFactory;
         private readonly ILogger<AccountController> logger;
 
-        /// <summary> Used to compare provided Passwords with User Passwords </summary>
-        private readonly PasswordHasher<User> hasher;
-
-        public AccountController(UserManager<User> userManager,
+        public AccountController(AppDbContext context,
+                                 IUserRepo userRepo,
+                                 IToConfirmRepo toConfirmRepo,
                                  ITokenBuilder tokenBuilder,
+                                 IMailService mailService,
                                  IHttpClientFactory clientFactory,
                                  ILogger<AccountController> logger)
         {
-            ServicePointManager
-                .ServerCertificateValidationCallback += 
-                (sender, cert, chain, sslPolicyErrors) => true;
-
-            this.userManager = userManager;
+            this.context = context;
+            this.userRepo = userRepo;
+            this.toConfirmRepo = toConfirmRepo;
             this.tokenBuilder = tokenBuilder;
+            this.mailService = mailService;
             this.clientFactory = clientFactory;
             this.logger = logger;
-            this.hasher = new PasswordHasher<User>();
+        }
+
+        [HttpPost]
+        [Route("Init")]
+        public async Task<IActionResult> Init(SecretViewModel viewModel)
+        {
+            if(ModelState.IsValid)
+            {
+                if (viewModel.Secret != Shared.Authorization.SECRET)
+                    return Unauthorized();
+
+                await Register(new RegisterViewModel
+                {
+                    Email = "pete@fakemail.com",
+                    FirstName = "Pete",
+                    LastName = "Townshend",
+                    Password = "password",
+                    ConfirmPassword = "password"
+                });
+                await Register(new RegisterViewModel
+                {
+                    Email = "roger@fakemail.com",
+                    FirstName = "Roger",
+                    LastName = "Daltrey",
+                    Password = "password",
+                    ConfirmPassword = "password"
+                });
+                await Register(new RegisterViewModel
+                {
+                    Email = "keith@fakemail.com",
+                    FirstName = "Keith",
+                    LastName = "Moon",
+                    Password = "password",
+                    ConfirmPassword = "password" 
+                });
+                await Register(new RegisterViewModel
+                {
+                    Email = "john@fakemail.com",
+                    FirstName = "John",
+                    LastName = "Entwistle",
+                    Password = "password",
+                    ConfirmPassword = "password" 
+                });
+                await Register(new RegisterViewModel
+                {
+                    Email = "jimmi@fakemail.com",
+                    FirstName = "Jimmi",
+                    LastName = "Hendrix",
+                    Password = "password",
+                    ConfirmPassword = "password" 
+                });
+                await Register(new RegisterViewModel
+                { 
+                    Email = "geddy@fakemail.com",
+                    FirstName = "Geddy",
+                    LastName = "Lee",
+                    Password = "password",
+                    ConfirmPassword = "password" 
+                });
+                await Register(new RegisterViewModel
+                {
+                    Email = "neil@fakemail.com",
+                    FirstName = "Neil",
+                    LastName = "Peart",
+                    Password = "password",
+                    ConfirmPassword = "password" 
+                });
+                await Register(new RegisterViewModel
+                {
+                    Email = "alex@fakemail.com",
+                    FirstName = "Alex",
+                    LastName = "Lifeson",
+                    Password = "password",
+                    ConfirmPassword = "password"
+                });
+                await Register(new RegisterViewModel
+                {
+                    Email = "freddie@fakemail.com",
+                    FirstName = "Freddie",
+                    LastName = "Mercury",
+                    Password = "password",
+                    ConfirmPassword = "password"  
+                });
+
+                List<int> tokens = new List<int>();
+                await context?.ToConfirms.ForEachAsync(tc => tokens.Add(tc.Token));
+                foreach (var token in tokens) await ConfirmEmail(token);
+
+                return Ok();
+            }
+            return BadRequest();
         }
 
         [HttpPost]
@@ -55,35 +153,32 @@ namespace _300Messenger.Accounts.Controllers
                 {
                     FirstName = viewModel.FirstName,
                     LastName = viewModel.LastName,
-                    UserName = viewModel.Email,
-                    Email = viewModel.Email.ToLower(),
-                    EmailConfirmed = false
+                    Email = viewModel.Email,
                 };
 
-                var result = await userManager.CreateAsync(user, viewModel.Password);
-
-                if(result.Succeeded)
+                try
                 {
-                    logger.LogInformation($"User created: {user.UserName}");
-                    return Ok(tokenBuilder.BuildToken(user.Email));
+                    await userRepo.CreateUserAsync(user, viewModel.Password);
+                }
+                catch(UserAlreadyExistsException)
+                {
+                    return BadRequest($"User with email {user.Email} already exists");
                 }
 
-                foreach(var error in result.Errors)
-                {
-                    // If this section of code is reached, it means that result
-                    // did not succeed - ie. userManager.CreateAsync was not successful. 
-                    // If this is the case, add the Errors to the ModelState, which will
-                    // display in the validation section of the HTML
-                    ModelState.AddModelError("", error.Description);
-                }
+                logger?.LogInformation($"User created: {user.Email}");
+
+                var toConfirm = await toConfirmRepo.AddAsync(user.Email);
+                mailService?.SendConfirmationEmail(toConfirm);
+
+                return Ok("User created: please confirm email to continue");
             }
 
             return ValidationProblem(ModelState);
         }
 
         /// <summary>
-        /// Logs in the User, using Identity controls
-        /// Requires username and password
+        /// Logs in the User, 
+        /// <return>The Jwt Token, if authentication was successful</return>
         /// </summary>
         [HttpGet]
         [Route("Login")]
@@ -91,19 +186,24 @@ namespace _300Messenger.Accounts.Controllers
         {
             if(ModelState.IsValid)
             {
-                var user = await userManager.FindByEmailAsync(viewModel.Email);
-                if(user != null)
+                try
                 {
+                    var user = await userRepo.LoginUserAsync(viewModel.Email, viewModel.Password);
                     if(!user.EmailConfirmed)
                     {
-                        return Unauthorized("Please confirm email before proceeding");
+                        return Unauthorized("Email must be confirmed before proceeding.");
                     }
-                    var result = hasher.VerifyHashedPassword(user, user.PasswordHash, viewModel.Password);
-                    if(result == PasswordVerificationResult.Success)
-                    {
-                        logger.LogInformation($"User JWT accessed: {user.Email}");
-                        return Ok(tokenBuilder.BuildToken(user.Email));
-                    }
+                    
+                    logger?.LogInformation($"User JWT accessed: {user.Email}");
+                    return Ok(tokenBuilder.BuildToken(user.Email));
+                }
+                catch(UserDoesNotExistException)
+                {
+                    return BadRequest($"The User with email {viewModel.Email} does not exist");
+                }
+                catch(UserPasswordDoesNotMatchException)
+                {
+                    return BadRequest($"The password did not match");
                 }
             }
             return BadRequest(ModelState);
@@ -112,22 +212,31 @@ namespace _300Messenger.Accounts.Controllers
         /// <summary>
         /// Confirms the supplied Email address (in viewModel)
         /// </summary>
-        [HttpPatch]
+        [HttpGet]
         [Route("ConfirmEmail")]
-        public async Task<IActionResult> ConfirmEmail(LoginViewModel viewModel)
+        public async Task<IActionResult> ConfirmEmail(int token)
         {
             if(ModelState.IsValid)
             {
-                var user = await userManager.FindByEmailAsync(viewModel.Email);
-                if(user == null)
+                try
                 {
-                    return BadRequest("User does not exist!");
+                    var toConfirm = await toConfirmRepo.GetToConfirmAsync(token);
+                    if (toConfirm != null)
+                    {
+                        var user = await userRepo.GetUserAsync(toConfirm.EmailToConfirm);
+
+                        user.EmailConfirmed = true;
+                        await userRepo.UpdateUserInfoAsync(user);
+                        await toConfirmRepo.RemoveAsync(toConfirm.Id);
+
+                        return Ok("User Email Confirmed");
+                    }
+                    else return BadRequest("Token not recognized");
                 }
-
-                user.EmailConfirmed = true;
-                await userManager.UpdateAsync(user);
-
-                return Ok();
+                catch(UserDoesNotExistException)
+                {
+                    return BadRequest($"User with token {token} does not exist.");
+                }
             }
             return BadRequest(ModelState);
         }
@@ -141,26 +250,67 @@ namespace _300Messenger.Accounts.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> VerifyToken()
         {
-            logger.LogInformation("Connection Established...");
             // Retrieve the single claim from the JWT (Email)
             var email = User.Claims.SingleOrDefault();
 
             if(email == null)
             {
-                return Unauthorized("Validation Error");
+                return BadRequest("Token could not be validated");
             }
 
-            var user = await userManager.FindByEmailAsync(email.Value);
-            if(user == null)
+            try
             {
-                return Unauthorized("The specified User Could not be found");
+                var user = await userRepo.GetUserAsync(email.Value);
+                return Ok(email.Value);
             }
-            if(!user.EmailConfirmed)
+            catch(UserDoesNotExistException)
             {
-                return Unauthorized("Please confirm email address before proceeding");
+                return Unauthorized("Token does not match any User in database");
+            }
+        }
+
+        [HttpGet]
+        [Route("GetUserByJwt")]
+        public async Task<IActionResult> GetUser(AuthorizedJwtViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var fromEmail =
+                    await Services.AuthorizationServices.VerifyToken(clientFactory, viewModel.JwtFrom);
+
+                if (fromEmail == null)
+                    return Unauthorized();
+
+                try
+                {
+                    return Ok(JsonConvert.SerializeObject(await userRepo.GetUserAsync(fromEmail)));
+                }
+                catch(UserDoesNotExistException)
+                {
+                    return BadRequest();
+                }
             }
 
-            return Ok(user.Email);
+            return BadRequest(ModelState.Values);
+        }
+
+
+        [HttpGet]
+        [Route("GetUserByEmail")]
+        public async Task<IActionResult> GetUser(AuthorizedEmailViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    return Ok(JsonConvert.SerializeObject(await userRepo.GetUserAsync(viewModel.Email)));
+                }
+                catch (UserDoesNotExistException)
+                {
+                    return BadRequest("The User does not exist");
+                }
+            }
+            return BadRequest(ModelState);
         }
 
         [HttpGet]
@@ -171,7 +321,7 @@ namespace _300Messenger.Accounts.Controllers
             var query = viewModel.Value;
 
             var fromEmail = 
-                await _300Messenger.Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.JwtFrom);
+                await AuthorizationServices.VerifyToken(clientFactory, viewModel.JwtFrom);
 
             if(fromEmail != null)
             {
@@ -189,15 +339,15 @@ namespace _300Messenger.Accounts.Controllers
                     }
                 }
                 return new JsonResult(
-                    userManager.Users.Where(
+                    userRepo.Where(
                         u =>
-                            values.Contains(u.Email.ToLower()) 
+                           values.Contains(u.Email.ToLower()) 
                         || values.Contains(u.FirstName.ToLower())
                         || values.Contains(u.LastName.ToLower())
                     )
                 );
             }
-            return BadRequest("User token not authorized.");
+            return Unauthorized("User token not authorized.");
         }
     }
 }

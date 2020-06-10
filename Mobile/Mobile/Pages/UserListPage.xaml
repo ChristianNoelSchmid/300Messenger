@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="Mobile.Pages.UserListPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <Grid>
+                <StackLayout x:Name="LayoutLoading"
+                            VerticalOptions="FillAndExpand">
+                    <ActivityIndicator Color="Orange"
+                        VerticalOptions="CenterAndExpand"
+                        IsRunning="true" />
+                </StackLayout>
+                <StackLayout>
+                    <StackLayout Margin="20"
+                                 x:Name="LayoutSearch">
+                        <Entry x:Name="EntrySearch" 
+                               Placeholder="Search..."
+                               Completed="OnSearchCompletion" />
+                    </StackLayout>
+                    <ScrollView x:Name="ViewUsers">
+                        <StackLayout Margin="10">
+                            <ListView
+                                RowHeight="75"
+                                HasUnevenRows="True"
+                                x:Name="ListViewFriends"
+                                ItemsSource="{Binding UsersInfo}"
+                                ItemTapped="OnUserTapped">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <ViewCell>
+                                            <Grid BackgroundColor="{Binding BackgroundColor}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="100"></ColumnDefinition>
+                                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                                </Grid.ColumnDefinitions>
+                                                <Image Source="{Binding ProfilePhoto}" />
+                                                <Grid Grid.Column="1" 
+                                                      Padding="5">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="*"></RowDefinition>
+                                                        <RowDefinition Height="20"></RowDefinition>
+                                                    </Grid.RowDefinitions>
+                                                    <Label Text="{Binding Name}" 
+                                                           FontSize="Large" />
+                                                    <Label Grid.Row="1" 
+                                                           Text="{Binding FriendStatusLabel}" />
+                                                </Grid>
+                                            </Grid>
+                                        </ViewCell>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </StackLayout>
+                    </ScrollView>
+                    <!-- The buttons that are generated when this Page is loaded to select Friends
+                    For instance, when creating a new MessageSession -->
+                    <StackLayout 
+                        VerticalOptions="EndAndExpand"  
+                        x:Name="LayoutMultiselect" 
+                        Margin="10" IsVisible="true">
+                        <Grid HeightRequest="60">
+                            <Button 
+                                BackgroundColor="LightGray"
+                                Clicked="OnCancelPressed"
+                                Text="Cancel" />
+                            <Button 
+                                Grid.Column="1" 
+                                BackgroundColor="LightBlue"
+                                Clicked="OnConfirmPressed"
+                                Text="Confirm" />
+                        </Grid>
+                    </StackLayout>
+                </StackLayout>
+            </Grid>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

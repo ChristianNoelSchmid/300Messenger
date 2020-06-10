@@ -2,16 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Images.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace _300Messenger.Images
+namespace Images
 {
     public class Startup
     {
@@ -27,6 +29,10 @@ namespace _300Messenger.Images
         {
             services.AddControllers();
             services.AddHttpClient();
+            services.AddDbContextPool<AppDbContext>(options =>
+                options.UseMySql(Configuration.GetConnectionString("DefaultConnection"))
+            );
+            services.AddScoped<IProfilePhotoPathRepo, DbProfilePhotoPathRepo>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

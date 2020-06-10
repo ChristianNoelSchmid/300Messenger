@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="Mobile.Pages.NewEditSessionPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <ScrollView>
+                <StackLayout Margin="20">
+                    <Label 
+                    FontSize="Large"
+                    Text="New Message Session"
+                    HorizontalTextAlignment="Center" />
+                    <Entry
+                    HeightRequest="60"
+                    Placeholder="Title"
+                    Text="{Binding Title}" />
+                    <Editor 
+                    HeightRequest="200" 
+                    Placeholder="Description"
+                    Text="{Binding Description}"/>
+                    <Label
+                    Text="Friends" />
+                    <Entry
+                    IsReadOnly="True"
+                    Text="{Binding FriendsLabel}" />
+                    <Button
+                    Clicked="OnChooseFriendsPressed"
+                    Text="Choose Friends..." />
+                </StackLayout>
+            </ScrollView>
+            <StackLayout x:Name="LayoutRemoveSession">
+                <Button
+                    Clicked="OnDeleteSessionPressed"
+                    Text="Delete Session"
+                    BackgroundColor="Transparent"
+                    TextColor="DarkRed" />
+            </StackLayout>
+            <StackLayout 
+                Margin="10"
+                VerticalOptions="EndAndExpand">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Button 
+                        Clicked="OnCancelPressed"
+                        BackgroundColor="LightGray"
+                        Text="Cancel" />
+                    <Button 
+                        Grid.Column="1"
+                        Clicked="OnSubmitPressed"
+                        Text="Submit"
+                        BackgroundColor="LightBlue" />
+                </Grid>
+            </StackLayout>
+         </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

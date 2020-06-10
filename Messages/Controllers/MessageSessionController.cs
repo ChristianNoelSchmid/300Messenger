@@ -6,37 +6,32 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using _300Messenger.Messages.Exceptions;
-using _300Messenger.Messages.Models;
-using _300Messenger.Messages.Models.Repositories;
-using _300Messenger.Messages.ViewModels;
+using Messages.Exceptions;
+using Messages.Models;
+using Messages.Models.Repositories;
+using Messages.ViewModels;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Shared.Models;
+using Shared.ViewModels;
 
-namespace _300Messenger.Messages.Controllers
+namespace Messages.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     public class MessageSessionController : Controller
     {
         private readonly IMessageSessionRepository sessionRepository;
-
         private readonly IHttpClientFactory clientFactory;
 
-        // The IWebHostEnvironment interface retrieves information
-        // about the hosting environment. It's from this interface that
-        // we retrieve the directory to the wwwroot folder 
-        // (see Create(MessageCreateViewModel) method)
-        private readonly IWebHostEnvironment hostingEnvironment;
-
         public MessageSessionController(IMessageSessionRepository sessionRepository,
-                                 IHttpClientFactory clientFactory,
-                                 IWebHostEnvironment hostingEnvironment)
+                                        IHttpClientFactory clientFactory)
         {
             this.sessionRepository = sessionRepository;
             this.clientFactory = clientFactory;
-            this.hostingEnvironment = hostingEnvironment;
         }
 
         [HttpGet]
@@ -46,14 +41,14 @@ namespace _300Messenger.Messages.Controllers
             if(ModelState.IsValid)
             {
                 var fromEmail = 
-                    await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
+                    await Services.AuthorizationServices.VerifyToken(clientFactory, viewModel.JwtFrom);
 
                 if(fromEmail != null)
                 {
                     try
                     {
                         var session = await sessionRepository.GetMessageSessionAsync(viewModel.Value, fromEmail); 
-                        return Ok(session);
+                        return Ok(JsonConvert.SerializeObject(session));
                     }  
                     catch(EmailNotAssociatedWithMessageSessionException)
                     {
@@ -71,7 +66,7 @@ namespace _300Messenger.Messages.Controllers
             if(ModelState.IsValid)
             {
                 var fromEmail = 
-                    await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
+                    await Services.AuthorizationServices.VerifyToken(clientFactory, viewModel.JwtFrom);
 
                 if(fromEmail != null)
                 {
@@ -89,15 +84,8 @@ namespace _300Messenger.Messages.Controllers
         {
             if(ModelState.IsValid)
             {
-                // Check status of SECRET to ensure that emails are added
-                // from a valid source
-                if(viewModel.Secret != Shared.Services.Authorization.SECRET)
-                {
-                    return BadRequest("Secret not matched.");
-                }
-
                 var fromEmail = 
-                    await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
+                    await Services.AuthorizationServices.VerifyToken(clientFactory, viewModel.FromJwt);
 
                 if(fromEmail != null)
                 {
@@ -114,7 +102,7 @@ namespace _300Messenger.Messages.Controllers
                     }
 
                     await sessionRepository.CreateMessageSessionAsync(session);
-                    return Ok(session);
+                    return Ok(JsonConvert.SerializeObject(session));
                 }
 
                 return BadRequest("Specified Token Not Found");
@@ -129,7 +117,7 @@ namespace _300Messenger.Messages.Controllers
             if(ModelState.IsValid)
             {
                 var fromEmail = 
-                    await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
+                    await Services.AuthorizationServices.VerifyToken(clientFactory, viewModel.JwtFrom);
 
                 if(fromEmail != null)
                 {
@@ -148,8 +136,7 @@ namespace _300Messenger.Messages.Controllers
                     }
                 }
             }
-
-            return BadRequest(ModelState);
+            return BadRequest();
         }
 
         [HttpGet]
@@ -159,7 +146,7 @@ namespace _300Messenger.Messages.Controllers
             if(ModelState.IsValid)
             {
                 var fromEmail = 
-                    await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
+                    await Services.AuthorizationServices.VerifyToken(clientFactory, viewModel.JwtFrom);
 
                 if(fromEmail != null)
                 {
@@ -177,75 +164,15 @@ namespace _300Messenger.Messages.Controllers
             }
             return BadRequest(ModelState);
         }
-
-        [HttpPatch] 
-        [Route("AddUsersToSession")]
-        public async Task<IActionResult> AddUsersToSession(MessageSessionAddRemoveUsersViewModel viewModel)
-        {
-            if(ModelState.IsValid)
-            {
-                // Check status of SECRET to ensure that emails are added
-                // from a valid source
-                if(viewModel.Secret != Shared.Services.Authorization.SECRET)
-                {
-                    return BadRequest("Secret not matched.");
-                }
-
-                var fromEmail = 
-                    await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
-
-                if(fromEmail != null)
-                {
-                    try
-                    {
-                        var session = await sessionRepository.AddUsersToSessionAsync(viewModel.SessionId, fromEmail, viewModel.Values);
-                        return Ok(session);
-                    }
-                    catch(EmailDoesNotMatchMessageSessionOwnerException)
-                    {
-                        return BadRequest("Only the session owner can add Users to a session.");
-                    }
-                }
-            }
-            return BadRequest(ModelState);
-        }
-
-        [HttpPatch]
-        [Route("RemoveUsersFromSession")]
-        public async Task<IActionResult> RemoveUsersFromSession(MessageSessionAddRemoveUsersViewModel viewModel)
+ 
+        [HttpPost]
+        [Route("AddMessage")] 
+        public async Task<IActionResult> AddMessageToSession(AuthorizedMessageViewModel viewModel)
         {
             if(ModelState.IsValid)
             {
                 var fromEmail = 
-                    await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
-
-                if(fromEmail != null)
-                {
-                    try
-                    {
-                        return Ok (
-                                await sessionRepository.RemoveUsersFromSessionAsync(
-                                viewModel.SessionId, fromEmail, viewModel.Values
-                            )
-                        );
-                    }
-                    catch(EmailDoesNotMatchMessageSessionOwnerException)
-                    {
-                        return BadRequest("Only session owners can remove users from a session");
-                    }
-                }
-            }
-            return BadRequest(ModelState);
-        }
-
-        [HttpPatch]
-        [Route("AddMessageToSession")] 
-        public async Task<IActionResult> AddMessageToSession(MessageSessionAddMessageViewModel viewModel)
-        {
-            if(ModelState.IsValid)
-            {
-                var fromEmail = 
-                    await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
+                    await Services.AuthorizationServices.VerifyToken(clientFactory, viewModel.JwtFrom);
 
                 if(fromEmail != null)
                 {
@@ -262,7 +189,7 @@ namespace _300Messenger.Messages.Controllers
                             }
                         );
 
-                        return Ok(session);
+                        return Ok(JsonConvert.SerializeObject(session));
                     }
                     catch(EmailNotAssociatedWithMessageSessionException)
                     {
@@ -274,24 +201,24 @@ namespace _300Messenger.Messages.Controllers
         }
 
         [HttpGet]
-        [Route("GetMessagesFromSession")]
+        [Route("GetMessages")]
         public async Task<IActionResult> GetMessagesForSession(AuthorizedIntViewModel viewModel)
         {
             if(ModelState.IsValid)
             {
                 var fromEmail = 
-                    await Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
+                    await Services.AuthorizationServices.VerifyToken(clientFactory, viewModel.JwtFrom);
 
                 if(fromEmail != null)
                 {
                     try
                     {
                         return Ok(
-                            await sessionRepository.GetMessagesForSessionAsync(
+                            JsonConvert.SerializeObject(await sessionRepository.GetMessagesForSessionAsync(
                                 viewModel.Value,
                                 fromEmail
-                            )
-                        );
+                            ))
+                        ); 
                     }
                     catch(EmailNotAssociatedWithMessageSessionException)
                     {

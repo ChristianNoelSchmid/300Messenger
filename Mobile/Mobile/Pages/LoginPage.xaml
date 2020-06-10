@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="Mobile.Pages.LoginPage">
+        <ContentPage.Content>
+        <StackLayout>
+
+            <Label HeightRequest="75"
+               Text="Please confirm your email address to login" 
+               TextColor="Transparent"
+               HorizontalTextAlignment="Center" VerticalTextAlignment="Center" 
+               FontSize="Medium"
+               x:Name="ConfirmMessage"/>
+            
+            <StackLayout Margin="20,40,20,10" VerticalOptions="Center">
+
+                <Label 
+                    FontSize="Large" 
+                    Text="Login"
+                    HorizontalOptions="Center"
+                    FontAttributes="Bold" />
+
+                <Entry 
+                    x:Name="EntryEmail"
+                    Placeholder="Email"
+                    HeightRequest="50" />
+
+                <Entry 
+                    x:Name="EntryPassword"
+                    Placeholder="Password"
+                    IsPassword="True"
+                    HeightRequest="50" />
+
+                <Grid VerticalOptions="FillAndExpand">
+                    <StackLayout>
+                        <Button 
+                            x:Name="ButtonLogin"
+                            Text="Login" 
+                            Clicked="OnLoginPressed" />
+                        <Label 
+                            x:Name="LabelError"
+                            TextColor="Red"
+                            Text=""
+                            HeightRequest="150" />
+                        <Button
+                            x:Name="ButtonRegister"
+                            Margin="0,30,0,0"
+                            Text="Register"
+                            TextColor="DarkBlue"
+                            BackgroundColor="Transparent"
+                            Clicked="OnRegisterPressed" />
+                    </StackLayout>
+                    <StackLayout 
+                        x:Name="LayoutLoading"
+                        IsVisible="False">
+                        <ActivityIndicator
+                            x:Name="ActivityIndicatorRunning"
+                            Color="Orange" />
+                    </StackLayout>
+                </Grid>
+
+            </StackLayout>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

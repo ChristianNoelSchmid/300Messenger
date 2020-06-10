@@ -2,9 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using _300Messenger.Messages.Exceptions;
+using Messages.Exceptions;
+using Messages.ViewModels;
+using Microsoft.AspNetCore.Mvc;
+using Shared.Models;
+using Shared.ViewModels;
 
-namespace _300Messenger.Messages.Models.Repositories
+namespace Messages.Models.Repositories
 {
     /// <summary>
     /// Primary implementation of the Message repository.
@@ -22,6 +26,9 @@ namespace _300Messenger.Messages.Models.Repositories
 
         public async Task<MessageSession> AddMessageToSessionAsync(int sessionId, string requesterEmail, Message message)
         {
+            if (message.MessageSessionId != sessionId)
+                throw new EmailNotAssociatedWithMessageSessionException();
+
             var session = await dbContext.MessageSessions.FindAsync(sessionId);
             if(session != null)
             {
@@ -30,25 +37,6 @@ namespace _300Messenger.Messages.Models.Repositories
                     throw new EmailNotAssociatedWithMessageSessionException();
                 }
                 await dbContext.Messages.AddAsync(message);
-                await dbContext.SaveChangesAsync();
-            }
-
-            return session;
-        }
-
-        public async Task<MessageSession> AddUsersToSessionAsync(int id, string requesterEmail, string[] userEmails)
-        {
-            var session = await dbContext.MessageSessions.FindAsync(id);
-            if(session != null)
-            {
-                if(!session.Emails.StartsWith(requesterEmail))
-                {
-                    throw new EmailDoesNotMatchMessageSessionOwnerException();
-                }
-                foreach(var email in userEmails)
-                {
-                    session.Emails += $";{email}";
-                }
                 await dbContext.SaveChangesAsync();
             }
 
@@ -113,32 +101,12 @@ namespace _300Messenger.Messages.Models.Repositories
                 {
                     throw new EmailNotAssociatedWithMessageSessionException();
                 }
-                return  dbContext.Messages.Where(m => m.MessageSessionId == id);
+                return dbContext.Messages
+                    .Where(m => m.MessageSessionId == id)
+                    .OrderBy(m => m.TimeStamp);
             }
 
             return null;
-        }
-
-        public async Task<MessageSession> RemoveUsersFromSessionAsync(int id, string requesterEmail, string[] usersToRemoveEmails)
-        {
-            var session = await dbContext.MessageSessions.FindAsync(id);   
-            if(session != null)
-            {
-                if(!session.Emails.StartsWith(requesterEmail))
-                {
-                    throw new EmailDoesNotMatchMessageSessionOwnerException();
-                }
-                
-                var emailList = new List<string>(session.Emails.Split(';'));
-                foreach(var userEmail in usersToRemoveEmails)
-                {
-                    emailList.Remove(userEmail);
-                }
-                session.Emails = string.Join(';', emailList);
-                await dbContext.SaveChangesAsync();
-            }
-
-            return session;
         }
 
         public async Task<string[]> GetSessionUsersAsync(int id, string requesterEmail)
@@ -155,6 +123,11 @@ namespace _300Messenger.Messages.Models.Repositories
             }
 
             return null;
+        }
+
+        public Task<MessageSession> UpdateMessageSessionAsync(int id, MessageSessionCreateViewModel newSession)
+        {
+            throw new NotImplementedException();
         }
     }
 }

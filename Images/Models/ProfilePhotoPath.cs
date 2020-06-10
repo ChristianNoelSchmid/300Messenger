@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace _300Messenger.Images.Models
+namespace Images.Models
 {
     public class ProfilePhotoPath
     {

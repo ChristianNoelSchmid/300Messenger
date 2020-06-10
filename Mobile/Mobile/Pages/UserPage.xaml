@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="Mobile.Pages.UserPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <StackLayout 
+                IsVisible="true"
+                VerticalOptions="FillAndExpand"
+                x:Name="LayoutLoading">
+                <ActivityIndicator
+                    Color="Orange"
+                    VerticalOptions="CenterAndExpand"
+                    IsRunning="true" />
+            </StackLayout>
+
+            <ScrollView
+                x:Name="LayoutContent"
+                IsVisible="false">
+
+                <StackLayout>
+                    <ImageButton
+                        Aspect="AspectFill"
+                        WidthRequest="{Binding ScreenWidth}"
+                        HeightRequest="200"
+                        Source="{Binding Photo}"
+                        BackgroundColor="Transparent" 
+                        Clicked="OnPhotoPressed"/>
+                    <StackLayout 
+                    VerticalOptions="Center" 
+                    Margin="20">
+
+
+
+                        <Label
+                        FontSize="Medium"
+                        HeightRequest="60"
+                        HorizontalTextAlignment="Center">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding User.FirstName}"  />
+                                    <Span Text=" " />
+                                    <Span Text="{Binding User.LastName}" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30"></RowDefinition>
+                                <RowDefinition Height="30"></RowDefinition>
+                            </Grid.RowDefinitions>
+
+                            <Label FontSize="Large"
+                            Text="Email" />
+                            <Label FontSize="Default"
+                            Grid.Column="1"
+                            Text="{Binding User.Email}" />
+                            <Label FontSize="Large"
+                            Grid.Row="1"
+                            Text="Password" />
+                            <Label FontSize="Large"
+                            Grid.Column="1"
+                            Grid.Row="1"
+                            Text="●●●●●●●●●●" />
+                        </Grid>
+                        <Label 
+                        Margin="0,40,0,0"
+                        FontSize="Large" 
+                        HorizontalTextAlignment="Center" 
+                        VerticalOptions="End"
+                        VerticalTextAlignment="End"
+                        Text="{Binding FriendLabel}" />
+                    </StackLayout>
+
+                    <StackLayout
+                    x:Name="LayoutAddAsFriend"
+                    VerticalOptions="EndAndExpand"
+                    Margin="10"
+                    IsVisible="false">
+                        <Button
+                        x:Name="ButtonAddAsFriend"
+                        Margin="0,100,0,0"
+                        HeightRequest="60"
+                        Text="Add as Friend"
+                        TextColor="DarkBlue"
+                        FontSize="Large"
+                        BackgroundColor="Transparent"
+                        Clicked="OnAddAsFriendPressed" />
+                    </StackLayout>
+                </StackLayout>
+            </ScrollView>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

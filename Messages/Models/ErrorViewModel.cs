@@ -1,6 +1,6 @@
 using System;
 
-namespace _300Messenger.Messages.Models
+namespace Messages.Models
 {
     public class ErrorViewModel
     {

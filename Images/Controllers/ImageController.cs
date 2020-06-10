@@ -4,13 +4,16 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using _300Messenger.Images.Models;
-using _300Messenger.Images.ViewModels;
+using Images.Models;
+using Images.Tools;
+using Images.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Shared.ViewModels;
 
-namespace _300Messenger.Images.Controllers
+namespace Images.Controllers
 {
     [ApiController]
     [Route("[controller]")]
@@ -30,6 +33,11 @@ namespace _300Messenger.Images.Controllers
             this._logger = logger;
         }
 
+        /// <summary>
+        /// Creates all Directories for image uploading
+        /// The root folder, and two folders in the root folder
+        /// (Profiles and Messages)
+        /// </summary>
         private void CreateDirectories()
         {
             if(!Directory.Exists(ROOT_DIR)) 
@@ -47,37 +55,56 @@ namespace _300Messenger.Images.Controllers
         }
 
         [HttpPost]
+        [DisableRequestSizeLimit]
         [Route("PostProfileImage")]
-        public async Task<IActionResult> PostProfileImage(ProfileImageViewModel viewModel)
+        public async Task<IActionResult> PostProfileImage()
         {
             CreateDirectories();      
 
             if(ModelState.IsValid)
             {
+                var file = Request.Form.Files.First();
+
+                var auth = Request.Form.First(f => f.Key == "Auth").Value;
+                var viewModel = JsonConvert.DeserializeObject<AuthorizedJwtViewModel>(auth);
+
                 var fromEmail = await
-                    Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
+                    Services.AuthorizationServices.VerifyToken(clientFactory, viewModel.JwtFrom);
 
-                if(fromEmail != null)
+                if (fromEmail != null)
                 {
-                    var filePath = Path.GetFileName(viewModel.FormFile.FileName);
-                    if(photoRepo.GetPhotoPath(fromEmail) != null)
-                    {
-                        await photoRepo.RemovePhotoPath(fromEmail);
+                    var filePath = Path.Combine(ROOT_DIR, PROFILE_DIR, Path.GetFileName(file.FileName));
+                    var photoPath = await photoRepo.GetPhotoPath(fromEmail);
 
-                        await photoRepo.AddPhotoPath(
-                            new ProfilePhotoPath() {
-                                Email = fromEmail,
-                                PhotoPath = filePath
-                            }
+                    // If there is already a PhotoPath that exists, delete
+                    // it and the thumbnail
+                    if (photoPath != null)
+                    {
+                        System.IO.File.Delete(photoPath.PhotoPath);
+                        System.IO.File.Delete(photoPath.PhotoPath.Replace(".", "THUMB."));
+                        await photoRepo.UpdatePhotoPath(
+                            fromEmail, filePath
                         );
                     }
-
-                    using (var fileStream = new FileStream(filePath, FileMode.Create)) {
-                        await viewModel.FormFile.CopyToAsync(fileStream);
+                    else
+                    {
+                        await photoRepo.AddPhotoPath(new ProfilePhotoPath
+                        {
+                            Email = fromEmail,
+                            PhotoPath = filePath
+                        });
                     }
 
+                    using (var photoStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(photoStream);
+                    }
+
+                    var thumbImage = ImageTools.ConvertToSize(file.OpenReadStream(), 64, 64);
+                    thumbImage.Save(filePath.Replace(".", "THUMB.")); 
+
                     return Ok();
-                }
+                } 
             }
 
             return BadRequest();
@@ -85,26 +112,31 @@ namespace _300Messenger.Images.Controllers
 
         [HttpGet]
         [Route("GetProfileImage")]
-        public async Task<IActionResult> GetProfileImage(AuthorizedJwtViewModel viewModel)
+        public async Task<IActionResult> GetProfileImage(AuthorizedProfileImageViewModel viewModel)
         {
-            CreateDirectories();      
-            if(ModelState.IsValid)
+            CreateDirectories();
+            if (ModelState.IsValid)
             {
-                var fromEmail = await
-                    Shared.Services.Authorization.VerifyToken(clientFactory, viewModel.FromJwt);
-
-                if(fromEmail != null)
+                var photoPath = await photoRepo.GetPhotoPath(viewModel.Email);
+                if (photoPath == null)
                 {
-                    var image = System.IO.File.OpenRead(
-                        await photoRepo.GetPhotoPath(fromEmail)
-                    );
-                    return File(image, "image/");
+                    return NotFound();
                 }
+
+                FileStream imageStream;
+                if (viewModel.IsThumb)
+                    imageStream = System.IO.File.OpenRead(photoPath.PhotoPath.Replace(".", "THUMB."));
+                else
+                    imageStream = System.IO.File.OpenRead(photoPath.PhotoPath);
+
+                var dotSplits = Path.GetFileName(photoPath.PhotoPath).Split('.');
+
+                return File(imageStream, $"image/{dotSplits[dotSplits.Length - 1]}");
             }
 
             return BadRequest(ModelState);
         }
-
+ 
         [HttpGet]
         [Route("GetMessageImage")]
         public IActionResult GetMessageImage(string filename)

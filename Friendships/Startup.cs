@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using _300Messenger.Friendships.Models;
+using Friendships.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -20,7 +20,7 @@ using Microsoft.IdentityModel.Tokens;
 
 using Pomelo.EntityFrameworkCore.MySql;
 
-namespace _300Messenger.Friendships
+namespace Friendships
 {
     public class Startup
     {
@@ -42,7 +42,7 @@ namespace _300Messenger.Friendships
                 options.UseMySql(Configuration.GetConnectionString("DefaultConnection"))
             );
 
-            services.AddScoped<IFriendshipRepo, FriendshipRepo>();
+            services.AddScoped<IFriendshipRepo, DbFriendshipRepo>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

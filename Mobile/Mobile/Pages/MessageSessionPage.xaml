@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="Mobile.Pages.MessageSessionPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <Label 
+                Text="{Binding Title}"
+                FontSize="Medium"
+                HeightRequest="60"
+                HorizontalTextAlignment="Center" 
+                VerticalTextAlignment="Center" />
+            <ScrollView HeightRequest="60">
+                <Label
+                    Text="{Binding Description}"
+                    BackgroundColor="WhiteSmoke"
+                    FontSize="Medium"
+                    HeightRequest="80"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center" />
+            </ScrollView>
+            <Button
+                IsVisible="false"
+                BackgroundColor="LightBlue"
+                HeightRequest="40"
+                Text="Edit Session"
+                Clicked="OnEditSessionPressed"
+                x:Name="ButtonEditSession" />
+            <ListView 
+                FlowDirection="RightToLeft"
+                Rotation="180"
+                HasUnevenRows="True"
+                ItemsSource="{Binding Messages}"
+                ItemTapped="OnUserMessagePressed">
+            <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Grid 
+                                FlowDirection="RightToLeft" 
+                                Rotation="180" Padding="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="75" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="75" />
+                                </Grid.ColumnDefinitions>
+                                <Image Source="{Binding ProfilePhoto}" IsVisible="{Binding IsUser}" />
+                                <Label Grid.Column="1" FontSize="Medium" Text="{Binding Content}" />
+                                <Image Source="{Binding ProfilePhoto}" Grid.Column="2" IsVisible="{Binding IsOther}" />
+                            </Grid>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="40"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Editor
+                    x:Name="EditorAddNewMessage"
+                    HeightRequest="100"
+                    Placeholder="New Message..." />
+                <Button
+                    Grid.Column="1"
+                    Text="^"
+                    FontSize="Title"
+                    BackgroundColor="LightBlue"
+                    Clicked="OnNewMessageEntered" />
+            </Grid>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

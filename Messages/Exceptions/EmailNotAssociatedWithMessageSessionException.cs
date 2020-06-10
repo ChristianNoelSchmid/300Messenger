@@ -1,6 +1,6 @@
 using System;
 
-namespace _300Messenger.Messages.Exceptions
+namespace Messages.Exceptions
 {
     public class EmailNotAssociatedWithMessageSessionException : Exception
     { }

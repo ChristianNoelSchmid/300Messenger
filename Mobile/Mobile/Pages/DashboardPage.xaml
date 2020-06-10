@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="Mobile.Pages.DashboardPage">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem 
+            Text="Account"
+            Order="Secondary" 
+            Priority="0"
+            Clicked="OnUserAccountPressed"/>
+        <ToolbarItem
+            Text="Friends"
+            Order="Secondary"
+            Priority="1"
+            Clicked="OnFriendsPressed" />
+        <ToolbarItem Order="Secondary" Priority="1" Text="____"/>
+        <ToolbarItem
+            Text="Logout"
+            Order="Secondary"
+            Priority="2"
+            Clicked="OnLogoutPressed" />
+    </ContentPage.ToolbarItems>
+
+    <ContentPage.Content>
+        <StackLayout>
+            <Label 
+                Text="Messages"
+                FontSize="Medium"
+                HeightRequest="75"
+                HorizontalTextAlignment="Center" 
+                VerticalTextAlignment="Center" />
+            <Grid>
+                <ListView 
+                    VerticalOptions="StartAndExpand"
+                    x:Name="ListViewSessions"
+                ItemsSource="{Binding Sessions}"
+                ItemTapped="OnSessionPressed">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <Grid Padding="10">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label FontSize="Medium" Text="{Binding Title}" />
+                                    <Label Grid.Column="1" Text="{Binding Description}" />
+                                </Grid>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <ActivityIndicator
+                    VerticalOptions="Center"
+                    x:Name="LoadingIndicator"
+                    IsVisible="False"
+                    Color="Orange"
+                    IsRunning="True" />
+            </Grid>
+            <Button 
+                HeightRequest="80"
+                Clicked="OnNewSessionPressed"
+                Text="New Session"
+                TextColor="DarkBlue"
+                BackgroundColor="Transparent" />
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

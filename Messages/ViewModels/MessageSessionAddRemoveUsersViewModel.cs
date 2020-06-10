@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace _300Messenger.Messages.ViewModels
+namespace Messages.ViewModels
 {
     public class MessageSessionAddRemoveUsersViewModel
     {
