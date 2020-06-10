@@ -21,7 +21,7 @@ using Shared.ViewModels;
 namespace Messages.Controllers
 {
     [ApiController]
-    [Route("")]
+    [Route("/")]
     public class MessageSessionController : Controller
     {
         private readonly IMessageSessionRepository sessionRepository;

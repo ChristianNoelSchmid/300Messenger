@@ -24,7 +24,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Accounts.Controllers
 {
     [ApiController]
-    [Route("")]
+    [Route("/")]
     public class AccountController : Controller
     {
         private readonly AppDbContext context;
@@ -134,9 +134,9 @@ namespace Accounts.Controllers
                     ConfirmPassword = "password"  
                 });
 
-                List<int> tokens = new List<int>();
-                await context?.ToConfirms.ForEachAsync(tc => tokens.Add(tc.Token));
-                foreach (var token in tokens) await ConfirmEmail(token);
+                //List<int> tokens = new List<int>();
+                //await context?.ToConfirms.ForEachAsync(tc => tokens.Add(tc.Token));
+                //foreach (var token in tokens) await ConfirmEmail(token);
 
                 return Ok();
             }
