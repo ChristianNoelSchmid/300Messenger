@@ -16,7 +16,7 @@ namespace Mobile.WebApi
 
         public static async Task<ResponseResult<string>> Register(RegisterViewModel viewModel)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://10.0.2.2:5005/Account/Register");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://52.12.195.150:5005/Account/Register");
 
             request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");
             var response = await _client.SendAsync(request);
@@ -29,7 +29,7 @@ namespace Mobile.WebApi
 
         public static async Task<ResponseResult<string>> GetJwt(string email, string password)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "https://10.0.2.2:5005/Account/Login");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "https://52.12.195.150:5005/Account/Login");
             var viewModel = new LoginViewModel()
             {
                 Email = email,
@@ -48,7 +48,7 @@ namespace Mobile.WebApi
 
         public static async Task<ResponseResult<User>> GetUserByJwt(string jwt)
         {
-            using (var request = new HttpRequestMessage(HttpMethod.Get, "https://10.0.2.2:5005/Account/GetUserByJwt"))
+            using (var request = new HttpRequestMessage(HttpMethod.Get, "https://52.12.195.150:5005/Account/GetUserByJwt"))
             {
                 var viewModel = new AuthorizedJwtViewModel { JwtFrom = jwt };
                 request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");
@@ -68,7 +68,7 @@ namespace Mobile.WebApi
 
         public static async Task<ResponseResult<User>> GetUserByEmail(string jwt, string email)
         {
-            using (var request = new HttpRequestMessage(HttpMethod.Get, "https://10.0.2.2:5005/Account/GetUserByEmail"))
+            using (var request = new HttpRequestMessage(HttpMethod.Get, "https://52.12.195.150:5005/Account/GetUserByEmail"))
             {
                 var viewModel = new AuthorizedEmailViewModel
                 {
@@ -94,7 +94,7 @@ namespace Mobile.WebApi
 
         public static async Task<ResponseResult<User[]>> GetUsersByQuery(string jwt, string query)
         {
-            using(var request = new HttpRequestMessage(HttpMethod.Get, "https://10.0.2.2:5005/Account/GetUsers"))
+            using(var request = new HttpRequestMessage(HttpMethod.Get, "https://52.12.195.150:5005/Account/GetUsers"))
             {
                 var viewModel = new AuthorizedQueryViewModel { JwtFrom = jwt, Value = query };
                 request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");
