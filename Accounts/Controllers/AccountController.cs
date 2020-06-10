@@ -154,6 +154,7 @@ namespace Accounts.Controllers
                     FirstName = viewModel.FirstName,
                     LastName = viewModel.LastName,
                     Email = viewModel.Email,
+                    EmailConfirmed = true
                 };
 
                 try
@@ -167,8 +168,9 @@ namespace Accounts.Controllers
 
                 logger?.LogInformation($"User created: {user.Email}");
 
-                var toConfirm = await toConfirmRepo.AddAsync(user.Email);
-                mailService?.SendConfirmationEmail(toConfirm);
+                // Not Working On Server for now
+                //var toConfirm = await toConfirmRepo.AddAsync(user.Email);
+                //mailService?.SendConfirmationEmail(toConfirm);
 
                 return Ok("User created: please confirm email to continue");
             }
