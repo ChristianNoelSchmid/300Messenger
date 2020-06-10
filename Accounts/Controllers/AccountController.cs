@@ -24,7 +24,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Accounts.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("")]
     public class AccountController : Controller
     {
         private readonly AppDbContext context;

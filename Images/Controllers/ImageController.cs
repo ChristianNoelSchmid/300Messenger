@@ -16,7 +16,7 @@ using Shared.ViewModels;
 namespace Images.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("")]
     public class ImageController : ControllerBase
     {
         private const string ROOT_DIR = "Media";

@@ -13,7 +13,7 @@ using Shared.ViewModels;
 namespace Friendships.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("")]
     public class FriendshipController : Controller
     {
         private readonly IFriendshipRepo friendshipRepo;
