@@ -15,6 +15,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "JWTTOKEN_VERIFICATION_URI": "http://localhost:5000/Accounts/Verify"
+        "CONFIRMATIONEMAIL_SENDERADDRESS": "cschmid92@gmail.com",
+        "CONFIRMATIONEMAIL_SENDERPASSWORD": "Giraffe898"
       },
       "applicationUrl": "http://localhost:5000;https://localhost:5003"
     }
