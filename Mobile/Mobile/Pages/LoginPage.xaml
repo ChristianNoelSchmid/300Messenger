@@ -6,8 +6,7 @@
              mc:Ignorable="d"
              x:Class="Mobile.Pages.LoginPage">
         <ContentPage.Content>
-        <StackLayout>
-
+            <StackLayout>
             <Label HeightRequest="75"
                Text="Please confirm your email address to login" 
                TextColor="Transparent"
@@ -34,7 +33,7 @@
                     IsPassword="True"
                     HeightRequest="50" />
 
-                <Grid VerticalOptions="FillAndExpand">
+                <Grid>
                     <StackLayout>
                         <Button 
                             x:Name="ButtonLogin"
@@ -44,10 +43,10 @@
                             x:Name="LabelError"
                             TextColor="Red"
                             Text=""
-                            HeightRequest="150" />
+                            HeightRequest="75" />
                         <Button
                             x:Name="ButtonRegister"
-                            Margin="0,30,0,0"
+                            Margin="0,0,0,0"
                             Text="Register"
                             TextColor="DarkBlue"
                             BackgroundColor="Transparent"
@@ -61,8 +60,7 @@
                             Color="Orange" />
                     </StackLayout>
                 </Grid>
-
             </StackLayout>
-        </StackLayout>
+         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
