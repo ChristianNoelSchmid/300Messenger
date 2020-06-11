@@ -51,7 +51,7 @@ namespace Accounts.Models
                 }
             );
 
-            return toConfirm;
+            return await Task.Run(() => toConfirm);
         }
 
         public Task DeleteAllMonthOldAsync()

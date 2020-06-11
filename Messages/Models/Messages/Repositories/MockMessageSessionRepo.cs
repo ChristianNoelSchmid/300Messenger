@@ -112,9 +112,20 @@ namespace Messages.Models.Repositories
 
             return await Task.Run(() => session);
         }
-        public async Task<MessageSession> UpdateMessageSessionAsync(int id, MessageSessionCreateViewModel newSession)
+        public async Task<MessageSession> UpdateMessageSessionAsync(int id, MessageSession newSession)
         {
-            throw new NotImplementedException();
+            var toUpdate = _sessions.FirstOrDefault(s => s.Id == id);
+            if(toUpdate != null)
+            {
+                if (toUpdate.Emails.Split(';')[0] != newSession.Emails.Split(';')[0])
+                    throw new EmailDoesNotMatchMessageSessionOwnerException();
+
+                toUpdate.Title = newSession.Title;
+                toUpdate.Description = newSession.Description;
+                toUpdate.Emails = newSession.Emails;
+            }
+
+            return await Task.Run(() => toUpdate);
         }
 
         public async Task<MessageSession> AddMessageToSessionAsync(int sessionId, string requesterEmail, Message message)
