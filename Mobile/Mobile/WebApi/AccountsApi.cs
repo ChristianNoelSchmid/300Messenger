@@ -18,34 +18,37 @@ namespace Mobile.WebApi
 
         public static async Task<ResponseResult<string>> Register(RegisterViewModel viewModel)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"{URI}/Register");
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"{URI}/Register"))
+            {
+                request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");
+                var response = await _client.SendAsync(request);
 
-            request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");
-            var response = await _client.SendAsync(request);
-
-            if(response.StatusCode == HttpStatusCode.OK)
-                return new ResponseResult<string>(true, null);
-            else
-                return new ResponseResult<string>(false, await response.Content.ReadAsStringAsync());
+                if (response.StatusCode == HttpStatusCode.OK)
+                    return new ResponseResult<string>(true, null);
+                else
+                    return new ResponseResult<string>(false, await response.Content.ReadAsStringAsync());
+            }
         }
 
         public static async Task<ResponseResult<string>> GetJwt(string email, string password)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{URI}/Login");
-            var viewModel = new LoginViewModel()
+            using (var request = new HttpRequestMessage(HttpMethod.Get, $"{URI}/Login"))
             {
-                Email = email,
-                Password = password
-            };
-            request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");
-            var response = await _client.SendAsync(request);
-            var content = await response.Content.ReadAsStringAsync();
+                var viewModel = new LoginViewModel()
+                {
+                    Email = email,
+                    Password = password
+                };
+                request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");
+                var response = await _client.SendAsync(request);
+                var content = await response.Content.ReadAsStringAsync();
 
-            if (response.IsSuccessStatusCode)
-            {
-                return new ResponseResult<string>(true, content);
+                if (response.IsSuccessStatusCode)
+                {
+                    return new ResponseResult<string>(true, content);
+                }
+                return new ResponseResult<string>(false, content);
             }
-            return new ResponseResult<string>(false, content);
         }
 
         public static async Task<ResponseResult<User>> GetUserByJwt(string jwt)

@@ -15,10 +15,10 @@ namespace Mobile.WebApi
 
         internal static Dictionary<string, string> ServerUriRoutes = new Dictionary<string, string>
         {
-            { "Accounts", "http://52.12.195.150/Accounts" },
-            { "Friendships", "http://52.12.195.150/Friendships" },
-            { "Messages", "http://52.12.195.150/Messages" },
-            { "Images", "http://52.12.195.150/Images" }
+            { "Accounts", "http://54.188.138.52/Accounts" },
+            { "Friendships", "http://54.188.138.52/Friendships" },
+            { "Messages", "http://54.188.138.52/Messages" },
+            { "Images", "http://54.188.138.52/Images" }
         };
         public static HttpClientHandler CreateHandler()
         {

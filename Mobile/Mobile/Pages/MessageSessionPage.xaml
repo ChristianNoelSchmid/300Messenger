@@ -15,7 +15,7 @@
                 HorizontalTextAlignment="Center" 
                 VerticalTextAlignment="Center" />
             <ScrollView 
-                Margin="0,10,0,10"
+                Margin="0,10,0,-10"
                 HeightRequest="100"
                 BackgroundColor="LightGray">
             <Label
@@ -63,7 +63,7 @@
                 </Grid.ColumnDefinitions>
                 <Editor
                     x:Name="EditorAddNewMessage"
-                    HeightRequest="100"
+                    HeightRequest="200"
                     Placeholder="New Message..." />
                 <Button
                     Grid.Column="1"

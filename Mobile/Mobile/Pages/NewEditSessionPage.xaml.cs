@@ -29,7 +29,8 @@ namespace Mobile.Pages
             _settings = settings;
 
             BindingContext = new NewEditSessionPageContext { Jwt = _settings.Jwt, FriendsList = new List<string>() };
-            _context = BindingContext as NewEditSessionPageContext; 
+            _context = BindingContext as NewEditSessionPageContext;
+            LayoutRemoveSession.IsVisible = false;
         }
 
         public NewEditSessionPage(SessionSettings settings, MessageSession session)
@@ -117,6 +118,8 @@ namespace Mobile.Pages
 
                 if(sessionResult.IsSuccessful)
                 {
+                    Navigation.RemovePage(Navigation.NavigationStack[1]);
+                    Navigation.InsertPageBefore(new MessageSessionPage(_settings, sessionResult.Content), this);
                     await Navigation.PopAsync();
                 }
             }
@@ -128,6 +131,7 @@ namespace Mobile.Pages
 
                 if (sessionResult.IsSuccessful)
                 {
+                    Navigation.InsertPageBefore(new MessageSessionPage(_settings, sessionResult.Content), this);
                     await Navigation.PopAsync();
                 }
             }

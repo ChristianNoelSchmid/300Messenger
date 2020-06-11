@@ -128,7 +128,8 @@ namespace Mobile.Pages
                 foreach (var user in usersResult.Content)
                 {
                     // Finally, convert the friendUser to a UserInfo, and add to the context list
-                    users.Add(await UserToUserInfo(user));
+                    if(user.Email != appUser.Email)
+                        users.Add(await UserToUserInfo(user));
                 }
                 users.OrderBy(s => s.FriendStatus);
 

@@ -32,6 +32,7 @@ namespace Mobile.Pages
         protected async override void OnAppearing()
         {
             base.OnAppearing();
+
             _context.UserEmail = (await AccountsApi.GetUserByJwt(_settings.Jwt)).Content.Email;
             await _context.Initialize();
             await _context.RefreshMessages(_settings.Jwt);
@@ -51,12 +52,16 @@ namespace Mobile.Pages
 
         async void OnNewMessageEntered(object sender, EventArgs args)
         {
-            var addMessageResult =
-                await MessagesApi.AddMessageToSession(_settings.Jwt, _context.Session.Id, EditorAddNewMessage.Text);
-
-            if(addMessageResult.IsSuccessful)
+            if (EditorAddNewMessage.Text.Trim() != "")
             {
-                await _context.RefreshMessages(_settings.Jwt);
+                var addMessageResult =
+                    await MessagesApi.AddMessageToSession(_settings.Jwt, _context.Session.Id, EditorAddNewMessage.Text);
+
+                if (addMessageResult.IsSuccessful)
+                {
+                    await _context.RefreshMessages(_settings.Jwt);
+                    EditorAddNewMessage.Text = "";
+                }
             }
         }
 
