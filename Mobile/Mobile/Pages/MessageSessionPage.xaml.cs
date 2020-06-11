@@ -22,20 +22,30 @@ namespace Mobile.Pages
         private SessionSettings _settings;
         private MessageSessionPageContext _context;
         private Thread _refreshThread;
+        private ThreadStart _threadStart;
         public MessageSessionPage(SessionSettings settings, MessageSession session)
         {
             _settings = settings;
             BindingContext = new MessageSessionPageContext(session);
             _context = BindingContext as MessageSessionPageContext;
 
-            _refreshThread = new Thread(async () =>
+            _threadStart = new ThreadStart(() =>
             {
                 while (true)
                 {
-                    await _context.RefreshMessages(_settings.Jwt);
-                    Thread.Sleep(3000);
+                    try
+                    {
+                        _context.RefreshMessages(_settings.Jwt);
+                        Thread.Sleep(3000);
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        break;
+                    }
                 }
             });
+
+            _refreshThread = new Thread(_threadStart);
 
             InitializeComponent();
         }   
@@ -46,6 +56,7 @@ namespace Mobile.Pages
 
             _context.UserEmail = (await AccountsApi.GetUserByJwt(_settings.Jwt)).Content.Email;
             await _context.Initialize();
+
             _refreshThread.Start();
 
             if (_context.UserIsOwner)
@@ -57,6 +68,7 @@ namespace Mobile.Pages
         protected override void OnDisappearing()
         {
             _refreshThread.Abort();
+            _refreshThread = new Thread(_threadStart);
         }
 
         async void OnEditSessionPressed(object sender, EventArgs args)
@@ -126,40 +138,37 @@ namespace Mobile.Pages
             }
         }
         
-        public async Task RefreshMessages(string jwt)
+        public void RefreshMessages(string jwt)
         {
-            var messagesResult = await MessagesApi.GetMessages(jwt, Session.Id);
+            var messagesResult = MessagesApi.GetMessages(jwt, Session.Id).Result;
             if (messagesResult.IsSuccessful && messagesResult.Content != null)
             {
                 var messages = messagesResult.Content;
                 if (messages.Length > Messages.Count)
                 {
-                    for (int i = 0; messages.Length - (i + 1) > Messages.Count; ++i)
-                    {
-                        var message = messages[i];
-                        var messageContext = new MessageContext
-                        {
-                            TimeStamp = message.TimeStamp,
-                            Email = message.Email,
-                            Content = message.Content,
-                            IsUser = message.Email == UserEmail,
-                        };
-                        if (messageContext.Email != _lastEmail)
-                        {
-                            messageContext.ProfilePhoto =
-                                ImageSource.FromStream(() => new MemoryStream(_userPhotos[message.Email]));
-                            _lastEmail = messageContext.Email;
-                        }
-                        _messages.Insert(0, messageContext);
-                    }
-                    
+                    _messages.InsertRange(0,
+                        messages.Take(messages.Length - Messages.Count).Select(
+                            (Message message) =>
+                            {
+                                var messageContext = new MessageContext
+                                {
+                                    TimeStamp = message.TimeStamp,
+                                    Email = message.Email,
+                                    Content = message.Content,
+                                    IsUser = message.Email == UserEmail,
+                                    ProfilePhoto = ImageSource.FromStream(() => new MemoryStream(_userPhotos[message.Email]))
+                                };
+                                return messageContext;
+                            }
+                        )
+                    ); 
+
                     OnPropertyChanged(nameof(Messages));
                 }
             }
         }
 
         /* Static Properties */
-        private string _lastEmail = null;
         public MessageSession Session { get; private set; }
             
         public string UserEmail { get; set; }
@@ -177,12 +186,13 @@ namespace Mobile.Pages
     }
 
     public class MessageContext
-    {
+    {  
+        /* Static Properties */
         public DateTime TimeStamp { get; set; }
         public string Email { get; set; }
         public string Content { get; set; }
-        public ImageSource ProfilePhoto { get; set; }
         public bool IsUser { get; set; }
         public bool IsOther => !IsUser;
+        public ImageSource ProfilePhoto { get; set; } = null;
     }
 }
