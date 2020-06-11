@@ -32,17 +32,13 @@
                 Clicked="OnEditSessionPressed"
                 x:Name="ButtonEditSession" />
             <ListView 
-                FlowDirection="RightToLeft"
-                Rotation="180"
                 HasUnevenRows="True"
                 ItemsSource="{Binding Messages}"
                 ItemTapped="OnUserMessagePressed">
-            <ListView.ItemTemplate>
+                <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
-                            <Grid 
-                                FlowDirection="RightToLeft" 
-                                Rotation="180" Padding="10">
+                            <Grid Padding="10">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="75" />
                                     <ColumnDefinition Width="*" />

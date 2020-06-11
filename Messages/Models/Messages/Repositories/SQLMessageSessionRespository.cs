@@ -103,7 +103,7 @@ namespace Messages.Models.Repositories
                 }
                 return dbContext.Messages
                     .Where(m => m.MessageSessionId == id)
-                    .OrderBy(m => m.TimeStamp);
+                    .OrderByDescending(m => m.TimeStamp);
             }
 
             return null;

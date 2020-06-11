@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
@@ -20,11 +21,21 @@ namespace Mobile.Pages
     {
         private SessionSettings _settings;
         private MessageSessionPageContext _context;
+        private Thread _refreshThread;
         public MessageSessionPage(SessionSettings settings, MessageSession session)
         {
             _settings = settings;
             BindingContext = new MessageSessionPageContext(session);
             _context = BindingContext as MessageSessionPageContext;
+
+            _refreshThread = new Thread(async () =>
+            {
+                while (true)
+                {
+                    await _context.RefreshMessages(_settings.Jwt);
+                    Thread.Sleep(3000);
+                }
+            });
 
             InitializeComponent();
         }   
@@ -35,12 +46,17 @@ namespace Mobile.Pages
 
             _context.UserEmail = (await AccountsApi.GetUserByJwt(_settings.Jwt)).Content.Email;
             await _context.Initialize();
-            await _context.RefreshMessages(_settings.Jwt);
+            _refreshThread.Start();
 
             if (_context.UserIsOwner)
             {
                 ButtonEditSession.IsVisible = true;
             }
+        }
+
+        protected override void OnDisappearing()
+        {
+            _refreshThread.Abort();
         }
 
         async void OnEditSessionPressed(object sender, EventArgs args)
@@ -59,7 +75,6 @@ namespace Mobile.Pages
 
                 if (addMessageResult.IsSuccessful)
                 {
-                    await _context.RefreshMessages(_settings.Jwt);
                     EditorAddNewMessage.Text = "";
                 }
             }
@@ -116,28 +131,30 @@ namespace Mobile.Pages
             var messagesResult = await MessagesApi.GetMessages(jwt, Session.Id);
             if (messagesResult.IsSuccessful && messagesResult.Content != null)
             {
-                var mostRecentMessage = Messages.FirstOrDefault();
-                foreach (var message in messagesResult.Content)
+                var messages = messagesResult.Content;
+                if (messages.Length > Messages.Count)
                 {
-                    if (mostRecentMessage != null && mostRecentMessage.TimeStamp >= message.TimeStamp)
-                        break;
-
-                    var messageContext = new MessageContext
+                    for (int i = 0; messages.Length - (i + 1) > Messages.Count; ++i)
                     {
-                        TimeStamp = message.TimeStamp,
-                        Email = message.Email,
-                        Content = message.Content,
-                        IsUser = message.Email == UserEmail,
-                    };
-                    if(messageContext.Email != _lastEmail)
-                    {
-                        messageContext.ProfilePhoto =
-                            ImageSource.FromStream(() => new MemoryStream(_userPhotos[message.Email]));
-                        _lastEmail = messageContext.Email; 
+                        var message = messages[i];
+                        var messageContext = new MessageContext
+                        {
+                            TimeStamp = message.TimeStamp,
+                            Email = message.Email,
+                            Content = message.Content,
+                            IsUser = message.Email == UserEmail,
+                        };
+                        if (messageContext.Email != _lastEmail)
+                        {
+                            messageContext.ProfilePhoto =
+                                ImageSource.FromStream(() => new MemoryStream(_userPhotos[message.Email]));
+                            _lastEmail = messageContext.Email;
+                        }
+                        _messages.Insert(0, messageContext);
                     }
-                    _messages.Insert(0, messageContext);
+                    
+                    OnPropertyChanged(nameof(Messages));
                 }
-                OnPropertyChanged(nameof(Messages));
             }
         }
 

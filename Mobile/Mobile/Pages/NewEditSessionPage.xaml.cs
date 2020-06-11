@@ -118,8 +118,8 @@ namespace Mobile.Pages
 
                 if(sessionResult.IsSuccessful)
                 {
-                    Navigation.RemovePage(Navigation.NavigationStack[1]);
                     Navigation.InsertPageBefore(new MessageSessionPage(_settings, sessionResult.Content), this);
+                    Navigation.RemovePage(Navigation.NavigationStack[2]);
                     await Navigation.PopAsync();
                 }
             }

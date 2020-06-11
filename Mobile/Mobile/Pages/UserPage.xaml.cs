@@ -134,33 +134,36 @@ namespace Mobile.Pages
 
         async void OnPhotoPressed(object sender, EventArgs args)
         {
-            var choice = await DisplayActionSheet("Update Photo", "Cancel", null, "Upload a Photo", "Take a Picture");
-            if (choice == "Upload a Photo")
+            if (_email == null)
             {
-                await CrossMedia.Current.Initialize();
-                var mediaOptions = new PickMediaOptions()
+                var choice = await DisplayActionSheet("Update Photo", "Cancel", null, "Upload a Photo", "Take a Picture");
+                if (choice == "Upload a Photo")
                 {
-                    PhotoSize = PhotoSize.Medium
-                };
-                var selectedImageFile = await CrossMedia.Current.PickPhotoAsync(mediaOptions);
-
-                if (selectedImageFile != null)
-                {
-                    if ((await ImagesApi.PostProfileImage(_settings.Jwt, selectedImageFile)).IsSuccessful)
+                    await CrossMedia.Current.Initialize();
+                    var mediaOptions = new PickMediaOptions()
                     {
-                        _userContext.Photo = ImageSource.FromStream(() => selectedImageFile.GetStream());
+                        PhotoSize = PhotoSize.Medium
+                    };
+                    var selectedImageFile = await CrossMedia.Current.PickPhotoAsync(mediaOptions);
+
+                    if (selectedImageFile != null)
+                    {
+                        if ((await ImagesApi.PostProfileImage(_settings.Jwt, selectedImageFile)).IsSuccessful)
+                        {
+                            _userContext.Photo = ImageSource.FromStream(() => selectedImageFile.GetStream());
+                        }
                     }
                 }
-            }
-            else if (choice == "Take a Picture")
-            {
-                var selectedImageFile = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions() { });
-
-                if (selectedImageFile != null)
+                else if (choice == "Take a Picture")
                 {
-                    if ((await ImagesApi.PostProfileImage(_settings.Jwt, selectedImageFile)).IsSuccessful)
+                    var selectedImageFile = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions() { });
+
+                    if (selectedImageFile != null)
                     {
-                        _userContext.Photo = ImageSource.FromStream(() => { return selectedImageFile.GetStream(); });
+                        if ((await ImagesApi.PostProfileImage(_settings.Jwt, selectedImageFile)).IsSuccessful)
+                        {
+                            _userContext.Photo = ImageSource.FromStream(() => { return selectedImageFile.GetStream(); });
+                        }
                     }
                 }
             }
