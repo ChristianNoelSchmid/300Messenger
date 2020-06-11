@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Shared.Models;
 using Shared.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.NetworkInformation;
@@ -104,6 +105,36 @@ namespace Mobile.WebApi
 
                 return new ResponseResult(false);
             }
+        }
+
+        public static async Task<ResponseResult<MessageSession>> UpdateMessageSession(string jwt, int editingSessionId, 
+            string title, string description, List<string> friendsList)
+        {
+            using (var request = new HttpRequestMessage(HttpMethod.Put, $"{URI}/UpdateSession"))
+            {
+                var viewModel = new MessageSessionUpdateViewModel
+                {
+                    Id = editingSessionId,
+                    JwtFrom = jwt,
+                    Title = title,
+                    Description = description,
+                    Emails = friendsList
+                };
+
+                request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");
+                var response = await _client.SendAsync(request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return new ResponseResult<MessageSession>(
+                        true,
+                        JsonConvert.DeserializeObject<MessageSession>(await response.Content.ReadAsStringAsync())
+                    );
+                }
+
+                return new ResponseResult<MessageSession>(false, null);
+            }
+
         }
 
         public static async Task<ResponseResult> DeleteSession(string jwt, int sessionId)

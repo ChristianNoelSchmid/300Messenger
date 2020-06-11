@@ -14,7 +14,7 @@ namespace Messages.Models.Repositories
         IEnumerable<MessageSession> GetMessageSessions(string email);
         Task<MessageSession> CreateMessageSessionAsync(MessageSession session);
         Task<MessageSession> DeleteMessageSessionAsync(int id, string requesterEmail);
-        Task<MessageSession> UpdateMessageSessionAsync(int id, MessageSessionCreateViewModel newSession);
+        Task<MessageSession> UpdateMessageSessionAsync(int id, MessageSession newSession);
         Task<MessageSession> AddMessageToSessionAsync(int sessionId, string requesterEmail, Message message);        
         Task<IEnumerable<Message>> GetMessagesForSessionAsync(int id, string requesterEmail);
         Task<string[]> GetSessionUsersAsync(int id, string requesterEmail);

@@ -115,9 +115,7 @@ namespace Messages.Models.Repositories
             if(session != null)
             {
                 if(!session.Emails.Contains(requesterEmail))
-                {
                     throw new EmailNotAssociatedWithMessageSessionException();
-                }
 
                 return session.Emails.Split(';');
             }
@@ -125,9 +123,21 @@ namespace Messages.Models.Repositories
             return null;
         }
 
-        public Task<MessageSession> UpdateMessageSessionAsync(int id, MessageSessionCreateViewModel newSession)
+        public async Task<MessageSession> UpdateMessageSessionAsync(int id, MessageSession newSession)
         {
-            throw new NotImplementedException();
+            var toUpdate = await dbContext.MessageSessions.FindAsync(id);
+            if(toUpdate != null)
+            {
+                if (toUpdate.Emails.Split(';')[0] != newSession.Emails.Split(';')[0])
+                    throw new EmailDoesNotMatchMessageSessionOwnerException();
+
+                toUpdate.Title = newSession.Title;
+                toUpdate.Description = newSession.Description;
+                toUpdate.Emails = newSession.Emails;
+                await dbContext.SaveChangesAsync();
+            }
+
+            return toUpdate;
         }
     }
 }

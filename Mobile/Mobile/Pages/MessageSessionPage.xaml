@@ -8,17 +8,19 @@
     <ContentPage.Content>
         <StackLayout>
             <Label 
+                Margin="0,10,0,0"
                 Text="{Binding Title}"
                 FontSize="Medium"
                 HeightRequest="60"
                 HorizontalTextAlignment="Center" 
                 VerticalTextAlignment="Center" />
-            <ScrollView HeightRequest="60">
-                <Label
+            <ScrollView 
+                Margin="0,10,0,10"
+                HeightRequest="100"
+                BackgroundColor="LightGray">
+            <Label
                     Text="{Binding Description}"
-                    BackgroundColor="WhiteSmoke"
                     FontSize="Medium"
-                    HeightRequest="80"
                     HorizontalTextAlignment="Center"
                     VerticalTextAlignment="Center" />
             </ScrollView>

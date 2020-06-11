@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -135,6 +136,36 @@ namespace Messages.Controllers
                         return BadRequest("Attempted to delete session not owned by requester.");
                     }
                 }
+            }
+            return BadRequest();
+        }
+
+        [HttpPut]
+        [Route("UpdateSession")]
+        public async Task<IActionResult> UpdateSession(MessageSessionUpdateViewModel viewModel)
+        {
+            if(ModelState.IsValid)
+            {
+                var fromEmail =
+                    await Services.AuthorizationServices.VerifyToken(clientFactory, viewModel.JwtFrom);
+
+                if (fromEmail == null)
+                    return Unauthorized();
+
+                var session = new MessageSession
+                {
+                    Title = viewModel.Title,
+                    Description = viewModel.Description,
+                    Emails = fromEmail
+                };
+
+                if(viewModel.Emails != null)
+                {
+                    session.Emails += ";" + string.Join(';', viewModel.Emails).ToLower();
+                }
+
+                await sessionRepository.UpdateMessageSessionAsync(viewModel.Id, session);
+                return Ok(JsonConvert.SerializeObject(session));
             }
             return BadRequest();
         }

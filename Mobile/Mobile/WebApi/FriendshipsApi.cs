@@ -17,7 +17,7 @@ namespace Mobile.WebApi
 
         public static async Task<ResponseResult<Friendship>> GetFriendship(string jwt, string email)
         {
-            using (var request = new HttpRequestMessage(HttpMethod.Get, "{URI}/GetFriendship"))
+            using (var request = new HttpRequestMessage(HttpMethod.Get, $"{URI}/GetFriendship"))
             {
                 var viewModel = new AuthorizedEmailViewModel { Email = email, JwtFrom = jwt };
                 request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");
@@ -62,7 +62,7 @@ namespace Mobile.WebApi
     
         public static async Task<ResponseResult> CreateFriendship(string jwt, string email)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "{URI}/Create");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"{URI}/Create");
             var viewModel = new AuthorizedEmailViewModel { JwtFrom = jwt, Email = email };
 
             request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");
@@ -78,7 +78,7 @@ namespace Mobile.WebApi
 
         public static async Task<ResponseResult> RemoveFriendship(string jwt, int id)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "{URI}/Remove");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"{URI}/Remove");
             var viewModel = new AuthorizedIntViewModel { JwtFrom = jwt, Value = id };
 
             request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");
@@ -94,7 +94,7 @@ namespace Mobile.WebApi
 
         public static async Task<ResponseResult> ConfirmFriendship(string jwt, int id)
         {
-            var request = new HttpRequestMessage(HttpMethod.Put, "{URI}/Confirm");
+            var request = new HttpRequestMessage(HttpMethod.Put, $"{URI}/Confirm");
             var viewModel = new AuthorizedIntViewModel { JwtFrom = jwt, Value = id };
 
             request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");

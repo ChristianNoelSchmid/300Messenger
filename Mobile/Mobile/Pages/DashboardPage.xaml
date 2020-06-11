@@ -12,14 +12,13 @@
             Priority="0"
             Clicked="OnUserAccountPressed"/>
         <ToolbarItem
-            Text="Friends"
+            Text="Social"
             Order="Secondary"
             Priority="1"
             Clicked="OnFriendsPressed" />
-        <ToolbarItem Order="Secondary" Priority="1" Text="____"/>
         <ToolbarItem
             Text="Logout"
-            Order="Secondary"
+            Order="Primary"
             Priority="2"
             Clicked="OnLogoutPressed" />
     </ContentPage.ToolbarItems>
@@ -41,18 +40,10 @@
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <ViewCell>
-                                <Grid Padding="10">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="*" />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Label FontSize="Medium" Text="{Binding Title}" />
-                                    <Label Grid.Column="1" Text="{Binding Description}" />
-                                </Grid>
+                                <Label 
+                                    HorizontalOptions="Center"
+                                    FontSize="Large" 
+                                    Text="{Binding Title}" />
                             </ViewCell>
                         </DataTemplate>
                     </ListView.ItemTemplate>

@@ -107,11 +107,29 @@ namespace Mobile.Pages
 
         async void OnSubmitPressed(object sender, EventArgs args)
         {
-            var sessionResult = 
-                await MessagesApi.CreateMessageSession(_settings.Jwt, _context.Title, _context.Description, _context.FriendsList);
-            if(sessionResult.IsSuccessful)
+            ResponseResult<MessageSession> sessionResult;
+
+            if (_editingSessionId != -1)
             {
-                await Navigation.PushAsync(new MessageSessionPage(_settings, sessionResult.Content));
+                sessionResult = 
+                    await MessagesApi.UpdateMessageSession(_settings.Jwt, _editingSessionId,
+                    _context.Title, _context.Description, _context.FriendsList);
+
+                if(sessionResult.IsSuccessful)
+                {
+                    await Navigation.PopAsync();
+                }
+            }
+            else
+            {
+                sessionResult =
+                    await MessagesApi.CreateMessageSession(_settings.Jwt, _context.Title, 
+                    _context.Description, _context.FriendsList);
+
+                if (sessionResult.IsSuccessful)
+                {
+                    await Navigation.PopAsync();
+                }
             }
         }
     }
