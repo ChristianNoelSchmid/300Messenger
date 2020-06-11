@@ -9,7 +9,7 @@ namespace Services
     public static class AuthorizationServices
     {
         private static string SECRET = "a_d3rpy_f1uffy_c0rg1";
-        private static HttpClient verifyClient = null;
+        private static HttpClient _client = null;
 
         public static async Task<string> VerifyToken(IHttpClientFactory clientFactory, string token)
         {
@@ -17,10 +17,10 @@ namespace Services
             // the secret removed (should be the email address)
             if (token.StartsWith(SECRET)) return token.Replace(SECRET, "");
 
-            if (verifyClient == null)
+            if (_client == null)
             {
                 var handler = new HttpClientHandler();
-                var verifyClient = new HttpClient(handler);
+                _client = new HttpClient(handler);
 
                 // Retrieve the Environment Variable for ASP.NET Core's 
                 // Environment mode
@@ -34,13 +34,13 @@ namespace Services
                 }
 
                 var verifyURI = Environment.GetEnvironmentVariable("JWTTOKEN_VERIFICATION_URI");
-                verifyClient.BaseAddress = new Uri(verifyURI);
+                _client.BaseAddress = new Uri(verifyURI);
             }
 
-            verifyClient.DefaultRequestHeaders.Authorization =
+            _client.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("bearer", token);
 
-            var response = await verifyClient.GetAsync("");
+            var response = await _client.GetAsync("");
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 return await response.Content.ReadAsStringAsync();
