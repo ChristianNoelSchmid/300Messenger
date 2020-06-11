@@ -14,7 +14,7 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "JWTTOKEN_VERIFICATION_URI": "http://localhost:5000/Accounts/Verify"
+        "JWTTOKEN_VERIFICATION_URI": "http://localhost:5000/Verify"
       },
       "applicationUrl": "http://localhost:5003;https://localhost:5007"
     }
