@@ -8,5 +8,16 @@
       "sslPort": 44375
     }
   },
-  "profiles": {}
+  "profiles": {
+    "300Messenger - Accounts": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "JWTTOKEN_VERIFICATION_URI": "http://localhost:5000/Accounts/Verify"
+      },
+      "applicationUrl": "http://localhost:5000;https://localhost:5003"
+    }
+
+  }
 }

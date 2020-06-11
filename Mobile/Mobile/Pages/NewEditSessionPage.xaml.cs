@@ -42,7 +42,7 @@ namespace Mobile.Pages
                 Jwt = _settings.Jwt,
                 Title = session.Title,
                 Description = session.Description,
-                FriendsList = new List<string>(session.Emails.Split(';'))
+                FriendsList = new List<string>(session.Emails.Split(';').Skip(1))
             };
             _context = BindingContext as NewEditSessionPageContext;
 
@@ -52,18 +52,16 @@ namespace Mobile.Pages
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            if(_editingSessionId != -1)
-            {
-                var builder = new StringBuilder(); bool first = true;
-                foreach (var email in _context.FriendsList)
-                {
-                    if(!first) builder.Append(", ");
-                    builder.Append((await AccountsApi.GetUserByEmail(_settings.Jwt, email)).Content.FirstName);
-                    first = false;
-                } 
 
-                _context.FriendsLabel = builder.ToString();
-            }
+            var builder = new StringBuilder(); bool first = true;
+            foreach (var email in _context.FriendsList)
+            {
+                if(!first) builder.Append(", ");
+                builder.Append((await AccountsApi.GetUserByEmail(_settings.Jwt, email)).Content.FirstName);
+                first = false;
+            } 
+
+            _context.FriendsLabel = builder.ToString();
         }
 
         async void OnChooseFriendsPressed(object sender, EventArgs args)
