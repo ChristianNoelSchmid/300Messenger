@@ -23,11 +23,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Accounts.Controllers
 {
+    /// <summary>
+    /// The Controller for the Accounts microservice.
+    /// Handles all incoming Http Requests regarding User registration,
+    /// logging in, and verifying Jwts. Also handles confirmation emails,
+    /// and validating Users emails before they can login (NOTE: feature
+    /// currently does not work on server)
+    /// </summary>
     [ApiController]
     [Route("/")]
     public class AccountController : Controller
     {
-        private readonly AppDbContext context;
         private readonly IUserRepo userRepo;
         private readonly IToConfirmRepo toConfirmRepo;
         private readonly ITokenBuilder tokenBuilder;
@@ -35,15 +41,13 @@ namespace Accounts.Controllers
         private readonly IHttpClientFactory clientFactory;
         private readonly ILogger<AccountController> logger;
 
-        public AccountController(AppDbContext context,
-                                 IUserRepo userRepo,
+        public AccountController(IUserRepo userRepo,
                                  IToConfirmRepo toConfirmRepo,
                                  ITokenBuilder tokenBuilder,
                                  IMailService mailService,
                                  IHttpClientFactory clientFactory,
                                  ILogger<AccountController> logger)
         {
-            this.context = context;
             this.userRepo = userRepo;
             this.toConfirmRepo = toConfirmRepo;
             this.tokenBuilder = tokenBuilder;
@@ -52,6 +56,16 @@ namespace Accounts.Controllers
             this.logger = logger;
         }
 
+        /// <summary>
+        /// Creates a list of fake Users in the database. The
+        /// Users cannot be seeded during intialization of the database, due
+        /// to the need for a password hasher. Therefore, it's done after, by
+        /// Http request.
+        /// </summary>
+        /// <param name="viewModel">
+        /// The viewModel which contains the Secret
+        /// associated with the application. Found in Services.AuthorizationServices
+        /// </param>
         [HttpPost]
         [Route("Init")]
         public async Task<IActionResult> Init(SecretViewModel viewModel)
@@ -143,12 +157,24 @@ namespace Accounts.Controllers
             return BadRequest();
         }
 
+        /// <summary>
+        /// Registers a new User, provided the information supplied in the viewModel
+        /// is correct.
+        /// Users MUST have...
+        ///     1) A unique email
+        ///     2) Two matching passwords (for confirmation)
+        ///     3) A first and last name inputted
+        ///  This method also sends a confirmation email to the User (NOTE: does not work on
+        ///  server right now)
+        /// </summary>
+        /// <param name="viewModel">The information the registering User inputted</param>
         [HttpPost]
         [Route("Register")]
         public async Task<IActionResult> Register(RegisterViewModel viewModel)
         {
             if(ModelState.IsValid)
             {
+                // Create the user
                 var user = new User()
                 {
                     FirstName = viewModel.FirstName,
@@ -159,18 +185,20 @@ namespace Accounts.Controllers
 
                 try
                 {
+                    // Add them to the database
                     await userRepo.CreateUserAsync(user, viewModel.Password);
                 }
                 catch(UserAlreadyExistsException)
                 {
+                    // If the email matches a different User, return a BadRequest
                     return BadRequest($"User with email {user.Email} already exists");
                 }
 
                 logger?.LogInformation($"User created: {user.Email}");
 
                 // Not Working On Server for now
-                //var toConfirm = await toConfirmRepo.AddAsync(user.Email);
-                //mailService?.SendConfirmationEmail(toConfirm);
+                // var toConfirm = await toConfirmRepo.AddAsync(user.Email);
+                // mailService?.SendConfirmationEmail(toConfirm);
 
                 return Ok("User created: please confirm email to continue");
             }
@@ -179,7 +207,8 @@ namespace Accounts.Controllers
         }
 
         /// <summary>
-        /// Logs in the User, 
+        /// Logs in the User. Requires an email and password to login
+        /// <param name="viewModel">The login information</param>
         /// <return>The Jwt Token, if authentication was successful</return>
         /// </summary>
         [HttpGet]
@@ -190,7 +219,11 @@ namespace Accounts.Controllers
             {
                 try
                 {
+                    // Attempt to Login
                     var user = await userRepo.LoginUserAsync(viewModel.Email, viewModel.Password);
+
+                    // Disallow logging in if the email has not been
+                    // confirmed by the User yet
                     if(!user.EmailConfirmed)
                     {
                         return Unauthorized("Email must be confirmed before proceeding.");
@@ -199,10 +232,12 @@ namespace Accounts.Controllers
                     logger?.LogInformation($"User JWT accessed: {user.Email}");
                     return Ok(tokenBuilder.BuildToken(user.Email));
                 }
+                // BadRequest if User does not exist
                 catch(UserDoesNotExistException)
                 {
                     return BadRequest($"The User with email {viewModel.Email} does not exist");
                 }
+                // Bad request if password does not match hashed password
                 catch(UserPasswordDoesNotMatchException)
                 {
                     return BadRequest($"The password did not match");
@@ -212,7 +247,9 @@ namespace Accounts.Controllers
         }
 
         /// <summary>
-        /// Confirms the supplied Email address (in viewModel)
+        /// Confirms the supplied Email address, by the token stored in
+        /// the ToConfirms database
+        /// <param name="token">The token representing the confirmed email</param>
         /// </summary>
         [HttpGet]
         [Route("ConfirmEmail")]
@@ -222,7 +259,10 @@ namespace Accounts.Controllers
             {
                 try
                 {
+                    // Retrieve the ToConfirm
                     var toConfirm = await toConfirmRepo.GetToConfirmAsync(token);
+
+                    // If a token exists, update the User to have a confirmed email
                     if (toConfirm != null)
                     {
                         var user = await userRepo.GetUserAsync(toConfirm.EmailToConfirm);
@@ -271,15 +311,22 @@ namespace Accounts.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrives the User, using the supplied Jwt
+        /// </summary>
+        /// <param name="viewModel">The Jwt view model</param>
+        /// <returns></returns>
         [HttpGet]
         [Route("GetUserByJwt")]
         public async Task<IActionResult> GetUser(AuthorizedJwtViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
+                // Verify the Jwt
                 var fromEmail =
-                    await Services.AuthorizationServices.VerifyToken(clientFactory, viewModel.JwtFrom);
+                    await AuthorizationServices.VerifyToken(clientFactory, viewModel.JwtFrom);
 
+                // Return Unauthorized if the Jwt was not validated
                 if (fromEmail == null)
                     return Unauthorized();
 
@@ -297,12 +344,24 @@ namespace Accounts.Controllers
         }
 
 
+        /// <summary>
+        /// Retrieves a User by email address. Requires an authorized Jwt
+        /// </summary>
+        /// <param name="viewModel">The view model containing the Jwt and Email</param>
         [HttpGet]
         [Route("GetUserByEmail")]
         public async Task<IActionResult> GetUser(AuthorizedEmailViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
+                // Verify the Jwt
+                var fromEmail =
+                    await AuthorizationServices.VerifyToken(clientFactory, viewModel.JwtFrom);
+
+                // Return Unauthorized if the Jwt was not validated
+                if (fromEmail == null)
+                    return Unauthorized();
+
                 try
                 {
                     return Ok(JsonConvert.SerializeObject(await userRepo.GetUserAsync(viewModel.Email)));
@@ -315,6 +374,13 @@ namespace Accounts.Controllers
             return BadRequest(ModelState);
         }
 
+        /// <summary>
+        /// Returns all users under the supplied query
+        /// Searches by first and last name, and email
+        /// Includes the User provided by the Jwt, so clients must
+        /// consider that additional element.
+        /// </summary>
+        /// <param name="viewModel">The Jwt-verified search query</param>
         [HttpGet]
         [Route("GetUsers")]
         public async Task<IActionResult> GetUsers(AuthorizedQueryViewModel viewModel)
@@ -322,13 +388,17 @@ namespace Accounts.Controllers
             var values = new List<string>();
             var query = viewModel.Value;
 
+            // Verify the Jwt
             var fromEmail = 
                 await AuthorizationServices.VerifyToken(clientFactory, viewModel.JwtFrom);
 
             if(fromEmail != null)
             {
+                // Search through the repository
                 if(query != null)
                 {
+                    // Split all elements by spaces, tabs, and newlines
+                    // and search through each one
                     query = query.ToLower();
                     values.AddRange(query.Split(' ', '\t', '\n'));
                     for(int i = values.Count - 1; i >= 0; i -= 1)

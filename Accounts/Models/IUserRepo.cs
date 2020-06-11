@@ -5,6 +5,10 @@ using System.Threading.Tasks;
 
 namespace Accounts.Models
 {
+    /// <summary>
+    /// Interface for User Repository
+    /// For dependency injection
+    /// </summary>
     public interface IUserRepo
     {
         Task<User> CreateUserAsync(User user, string password);

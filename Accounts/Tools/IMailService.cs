@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Accounts.Tools
 {
+    /// <summary>
+    /// Interface for MailingService
+    /// For dependency injection
+    /// </summary>
     public interface IMailService
     { 
         public void SendConfirmationEmail(ToConfirm toConfirm);

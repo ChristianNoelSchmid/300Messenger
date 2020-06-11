@@ -11,6 +11,11 @@ using System.Threading.Tasks;
 
 namespace Accounts.Tools
 {
+    /// <summary>
+    /// Handles sending emails to a client User's email address
+    /// Used to handle sending confirmation emails when a User
+    /// registers.
+    /// </summary>
     public class MailService : IMailService
     {
         private readonly string _filename = "ConfirmAddress.html";
@@ -27,6 +32,7 @@ namespace Accounts.Tools
             FromPassword =
                 Environment.GetEnvironmentVariable("CONFIRMATIONEMAIL_SENDERPASSWORD");
 
+            // Create the client, using supplied information in Properties/launchSettings.json
             _client = new SmtpClient()
             {
                 Host = "smtp.gmail.com",
@@ -38,6 +44,10 @@ namespace Accounts.Tools
             };
         }
 
+        /// <summary>
+        /// Sends an email, using a ToConfirm token to represent
+        /// the link value.
+        /// </summary>
         public void SendConfirmationEmail(ToConfirm toConfirm)
         {
             var staticIp = Environment.GetEnvironmentVariable("STATICIP");

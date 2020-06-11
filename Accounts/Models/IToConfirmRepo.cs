@@ -2,6 +2,10 @@
 
 namespace Accounts.Models
 {
+    /// <summary>
+    /// Interface for ToConfirm Repository
+    /// For dependency injection
+    /// </summary>
     public interface IToConfirmRepo
     {
         Task<ToConfirm> AddAsync(string email);
