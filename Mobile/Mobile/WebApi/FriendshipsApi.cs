@@ -17,7 +17,7 @@ namespace Mobile.WebApi
 
         public static async Task<ResponseResult<Friendship>> GetFriendship(string jwt, string email)
         {
-            using (var request = new HttpRequestMessage(HttpMethod.Get, "https://10.0.2.2:5001/Friendship/GetFriendship"))
+            using (var request = new HttpRequestMessage(HttpMethod.Get, "{URI}/GetFriendship"))
             {
                 var viewModel = new AuthorizedEmailViewModel { Email = email, JwtFrom = jwt };
                 request.Content = new StringContent(JsonConvert.SerializeObject(viewModel), Encoding.UTF8, "application/json");
