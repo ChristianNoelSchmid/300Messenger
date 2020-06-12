@@ -12,6 +12,11 @@ using Shared.ViewModels;
 
 namespace Friendships.Controllers
 {
+    /// <summary>
+    /// The Controller for the Friendships microservice.
+    /// Handles all requested and confirmed Friendships in the 
+    /// application, as well as retrieval and deletion of values.
+    /// </summary>
     [ApiController]
     [Route("/")]
     public class FriendshipController : Controller
@@ -26,6 +31,12 @@ namespace Friendships.Controllers
             this._clientFactory = clientFactory;
         }
 
+        /// <summary>
+        /// Creates a new Friendship, if it doesn't already exist
+        /// Requires a requester Jwt, and confirmer email
+        /// </summary>
+        /// <param name="viewModel">The view model containing the new Friendship info</param>
+        /// <returns></returns>
         [HttpPost]
         [Route("Create")]
         public async Task<IActionResult> Create(AuthorizedEmailViewModel viewModel)
@@ -54,6 +65,13 @@ namespace Friendships.Controllers
             return BadRequest(ModelState);
         }
 
+        /// <summary>
+        /// Confirms a Friendship
+        /// Requires that the friendship exists, and that the User who confirms 
+        /// matches the confirmer email, or else a BadRequest will be sent
+        /// </summary>
+        /// <param name="viewModel">The Friendship Id, with the Jwt</param>
+        /// <returns></returns>
         [HttpPut]
         [Route("Confirm")]
         public async Task<IActionResult> Confirm(AuthorizedIntViewModel viewModel)
@@ -86,6 +104,11 @@ namespace Friendships.Controllers
             return BadRequest(ModelState);
         }
 
+        /// <summary>
+        /// Removes a Friendship, by Jwt and Id
+        /// </summary>
+        /// <param name="viewModel"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("Remove")]
         public async Task<IActionResult> Remove(AuthorizedIntViewModel viewModel)
@@ -113,6 +136,9 @@ namespace Friendships.Controllers
             return BadRequest(ModelState);
         }
 
+        /// <summary>
+        /// Gets the specified friendship, by the provided Jwt email and view model email
+        /// </summary>
         [HttpGet]
         [Route("GetFriendship")]
         public async Task<IActionResult> GetFriendship(AuthorizedEmailViewModel viewModel)
@@ -139,6 +165,10 @@ namespace Friendships.Controllers
             return BadRequest();
         }
 
+        /// <summary>
+        /// Retrieves all Friendships associated with an email.
+        /// Includes both requesters and confirmers who match email
+        /// </summary>
         [HttpGet]
         [Route("GetFriendships")]
         public async Task<IActionResult> GetFriendships(AuthorizedJwtViewModel viewModel)

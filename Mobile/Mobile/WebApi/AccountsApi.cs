@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace Mobile.WebApi
-{   
+{
     public static class AccountsApi
     {
         private static readonly HttpClient _client = new HttpClient(WebApiSettings.CreateHandler());
-        private static readonly string URI = WebApiSettings.ServerUriRoutes["Accounts"];
+        private static readonly string URI = WebApiSettings.DevUriRoutes["Accounts"];
 
         public static async Task<ResponseResult<string>> Register(RegisterViewModel viewModel)
         {

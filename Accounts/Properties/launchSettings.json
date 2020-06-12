@@ -1,5 +1,4 @@
 {
-  "$schema": "http://json.schemastore.org/launchsettings.json",
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
@@ -8,18 +7,17 @@
       "sslPort": 44375
     }
   },
+  "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
     "300Messenger - Accounts": {
       "commandName": "Project",
-      "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
+        "CONFIRMATIONEMAIL_SENDERPASSWORD": "Giraffe898",
         "JWTTOKEN_VERIFICATION_URI": "http://localhost:5000/Verify",
         "CONFIRMATIONEMAIL_SENDERADDRESS": "cschmid92@gmail.com",
-        "CONFIRMATIONEMAIL_SENDERPASSWORD": "Giraffe898"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:5000;https://localhost:5004"
     }
-
   }
 }

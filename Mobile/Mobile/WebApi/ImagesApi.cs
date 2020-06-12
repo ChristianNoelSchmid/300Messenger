@@ -15,7 +15,7 @@ namespace Mobile.WebApi
     public static class ImagesApi
     {
         private static readonly HttpClient _client = new HttpClient(WebApiSettings.CreateHandler());
-        private static readonly string URI = WebApiSettings.ServerUriRoutes["Images"];
+        private static readonly string URI = WebApiSettings.DevUriRoutes["Images"];
         public static async Task<ResponseResult<ImageSource>> GetProfileImage(string email, bool isThumb)
         {
             using (var request = new HttpRequestMessage(HttpMethod.Get, $"{URI}/GetProfileImage"))

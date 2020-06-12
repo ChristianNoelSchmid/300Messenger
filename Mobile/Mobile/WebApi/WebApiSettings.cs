@@ -7,10 +7,10 @@ namespace Mobile.WebApi
     {
         internal static Dictionary<string, string> DevUriRoutes = new Dictionary<string, string>
         {
-            { "Accounts", "https://10.0.2.2:5004/" },
-            { "Friendships", "https://10.0.2.2:5005/" },
-            { "Messages", "https://10.0.2.2:5006/" },
-            { "Images", "https://10.0.2.2:5007/" }
+            { "Accounts", "http://10.0.2.2:5000" },
+            { "Friendships", "http://10.0.2.2:5001" },
+            { "Messages", "http://10.0.2.2:5002" },
+            { "Images", "http://10.0.2.2:5003" }
         };
 
         internal static Dictionary<string, string> ServerUriRoutes = new Dictionary<string, string>

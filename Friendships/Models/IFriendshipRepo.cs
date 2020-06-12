@@ -4,6 +4,10 @@ using System.Threading.Tasks;
 
 namespace Friendships.Models
 {
+    /// <summary>
+    /// Interface for Friendship Repository
+    /// For dependency injection
+    /// </summary>
     public interface IFriendshipRepo
     {
         Task<Friendship> AddUnconfirmedFriendshipAsync(string from, string to);

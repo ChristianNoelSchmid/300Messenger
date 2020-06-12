@@ -13,7 +13,7 @@ namespace Mobile.WebApi
     public static class MessagesApi
     {
         private static readonly HttpClient _client = new HttpClient(WebApiSettings.CreateHandler());
-        private static readonly string URI = WebApiSettings.ServerUriRoutes["Messages"];
+        private static readonly string URI = WebApiSettings.DevUriRoutes["Messages"];
 
         public static async Task<ResponseResult<MessageSession>> CreateMessageSession(string jwt, string title, string description, List<string> emails)
         {

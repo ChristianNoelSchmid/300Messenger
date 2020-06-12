@@ -13,7 +13,7 @@ namespace Mobile.WebApi
     public static class FriendshipsApi
     {
         private static readonly HttpClient _client = new HttpClient(WebApiSettings.CreateHandler());
-        private static readonly string URI = WebApiSettings.ServerUriRoutes["Friendships"];
+        private static readonly string URI = WebApiSettings.DevUriRoutes["Friendships"];
 
         public static async Task<ResponseResult<Friendship>> GetFriendship(string jwt, string email)
         {

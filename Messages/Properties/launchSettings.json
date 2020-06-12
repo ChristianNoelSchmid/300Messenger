@@ -11,13 +11,11 @@
   "profiles": {
     "300Messenger - Messages": {
       "commandName": "Project",
-      "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "JWTTOKEN_VERIFICATION_URI": "http://localhost:5000/Verify"
+        "JWTTOKEN_VERIFICATION_URI": "http://localhost:5000/Verify",
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:5002;https://localhost:5006"
     }
-
   }
 }
