@@ -1,15 +1,9 @@
 ﻿using Mobile.Resources;
 using Mobile.WebApi;
-using Newtonsoft.Json;
 using Shared.Models;
-using Shared.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Xamarin.Essentials;

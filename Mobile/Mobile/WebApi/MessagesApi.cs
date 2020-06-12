@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.SignalR.Client;
+using Newtonsoft.Json;
 using Shared.Models;
 using Shared.ViewModels;
 using System;
@@ -157,5 +158,14 @@ namespace Mobile.WebApi
             }
         }
 
+        public static async Task<HubConnection> GetSessionConnection(MessageSession session)
+        {
+            var hubConnection = new HubConnectionBuilder()
+                .WithUrl($"{URI}/SessionHub")
+                .Build();
+            await hubConnection.StartAsync();
+            await hubConnection.InvokeAsync("Join", session.Id);
+            return hubConnection;
+        }
     }
 }

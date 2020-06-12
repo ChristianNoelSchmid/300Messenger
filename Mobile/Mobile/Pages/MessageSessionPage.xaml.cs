@@ -1,4 +1,5 @@
-﻿using Mobile.Resources;
+﻿using Microsoft.AspNetCore.SignalR.Client;
+using Mobile.Resources;
 using Mobile.WebApi;
 using Shared.Models;
 using System;
@@ -21,31 +22,14 @@ namespace Mobile.Pages
     {
         private SessionSettings _settings;
         private MessageSessionPageContext _context;
-        private Thread _refreshThread;
-        private ThreadStart _threadStart;
+
+        private HubConnection _hubConnection;
+        
         public MessageSessionPage(SessionSettings settings, MessageSession session)
         {
             _settings = settings;
             BindingContext = new MessageSessionPageContext(session);
             _context = BindingContext as MessageSessionPageContext;
-
-            _threadStart = new ThreadStart(() =>
-            {
-                while (true)
-                {
-                    try
-                    {
-                        _context.RefreshMessages(_settings.Jwt);
-                        Thread.Sleep(3000);
-                    }
-                    catch (ThreadAbortException)
-                    {
-                        break;
-                    }
-                }
-            });
-
-            _refreshThread = new Thread(_threadStart);
 
             InitializeComponent();
         }   
@@ -56,8 +40,13 @@ namespace Mobile.Pages
 
             _context.UserEmail = (await AccountsApi.GetUserByJwt(_settings.Jwt)).Content.Email;
             await _context.Initialize();
+            await _context.RefreshMessages(_settings.Jwt);
 
-            _refreshThread.Start();
+            _hubConnection = await MessagesApi.GetSessionConnection(_context.Session);
+            _hubConnection.On("UpdateSessions", async () =>
+            {
+                await _context.RefreshMessages(_settings.Jwt);
+            });
 
             if (_context.UserIsOwner)
             {
@@ -65,10 +54,9 @@ namespace Mobile.Pages
             }
         }
 
-        protected override void OnDisappearing()
+        protected async override void OnDisappearing()
         {
-            _refreshThread.Abort();
-            _refreshThread = new Thread(_threadStart);
+            await _hubConnection.StopAsync();
         }
 
         async void OnEditSessionPressed(object sender, EventArgs args)
@@ -88,6 +76,7 @@ namespace Mobile.Pages
                 if (addMessageResult.IsSuccessful)
                 {
                     EditorAddNewMessage.Text = "";
+                    await _hubConnection.InvokeAsync("UpdateMessage", _context.Session.Id);
                 }
             }
         }
@@ -138,9 +127,9 @@ namespace Mobile.Pages
             }
         }
         
-        public void RefreshMessages(string jwt)
+        public async Task RefreshMessages(string jwt)
         {
-            var messagesResult = MessagesApi.GetMessages(jwt, Session.Id).Result;
+            var messagesResult = await MessagesApi.GetMessages(jwt, Session.Id);
             if (messagesResult.IsSuccessful && messagesResult.Content != null)
             {
                 var messages = messagesResult.Content;
