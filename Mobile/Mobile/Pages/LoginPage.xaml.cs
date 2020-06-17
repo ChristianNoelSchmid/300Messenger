@@ -33,9 +33,9 @@ namespace Mobile.Pages
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            await RetrieveLoginInfo(); 
+            await RetrieveLoginInfo();            
         }
-
+ 
         private async Task AnimateConfirmMessage()
         {
             ConfirmMessage.Layout(new Rectangle(0, -75, Application.Current.MainPage.Width, 75));
@@ -52,13 +52,13 @@ namespace Mobile.Pages
             {
                 BindingContext = new RegisterContext() { Email = EntryEmail.Text ?? "" },
             };
-            registerPage.Disappearing += async (_, __) =>
+            /*registerPage.Disappearing += async (_, __) =>
             {
                 if ((registerPage.BindingContext as RegisterContext).Completed)
                 {
                     await AnimateConfirmMessage();
                 }
-            };
+            };*/
             await Navigation.PushAsync(registerPage);
         }
 

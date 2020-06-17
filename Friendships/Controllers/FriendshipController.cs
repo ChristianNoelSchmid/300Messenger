@@ -6,6 +6,7 @@ using Friendships.Exceptions;
 using Friendships.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Shared.Models;
 using Shared.ViewModels;
@@ -23,12 +24,15 @@ namespace Friendships.Controllers
     {
         private readonly IFriendshipRepo friendshipRepo;
         private readonly IHttpClientFactory _clientFactory;
+        private readonly ILogger<FriendshipController> _logger;
 
-        public FriendshipController(IFriendshipRepo friendshipRepo, 
-            IHttpClientFactory clientFactory)
+        public FriendshipController(IFriendshipRepo friendshipRepo,
+            IHttpClientFactory clientFactory,
+            ILogger<FriendshipController> logger)
         {
             this.friendshipRepo = friendshipRepo;
             this._clientFactory = clientFactory;
+            this._logger = logger;
         }
 
         /// <summary>
@@ -53,6 +57,7 @@ namespace Friendships.Controllers
                     try
                     {
                         await friendshipRepo.AddUnconfirmedFriendshipAsync(fromEmail, viewModel.Email);
+                        _logger.LogInformation($"Created new friendship between {fromEmail} and {viewModel.Email}");
                         return Ok();
                     }
                     catch(FriendshipAlreadyExistsException)
@@ -88,6 +93,7 @@ namespace Friendships.Controllers
                     try
                     {
                         var friendship = await friendshipRepo.ConfirmFriendshipAsync(viewModel.Value, fromEmail);
+                        _logger.LogInformation($"Confirmed friendship between {friendship.RequesterEmail} and {friendship.ConfirmerEmail}"); 
                         return Ok();
                     }
                     catch (FriendshipDoesNotExistException)
@@ -124,7 +130,8 @@ namespace Friendships.Controllers
                 {
                     try
                     {
-                        await friendshipRepo.RemoveFriendshipAsync(viewModel.Value);
+                        var friendship = await friendshipRepo.RemoveFriendshipAsync(viewModel.Value);
+                        _logger.LogInformation($"Removed friendship between {friendship.RequesterEmail} and {friendship.ConfirmerEmail}"); 
                         return Ok();
                     }
                     catch(FriendshipDoesNotExistException)
@@ -152,9 +159,12 @@ namespace Friendships.Controllers
                 {
                     try
                     {
-                        return Ok(JsonConvert.SerializeObject(
-                            await friendshipRepo.GetFriendship(fromEmail, viewModel.Email)
-                        ));
+                        var friendship = await friendshipRepo.GetFriendship(fromEmail, viewModel.Email);
+                        
+                        _logger.LogInformation($"Retrieved friendship between {friendship.RequesterEmail} and {friendship.ConfirmerEmail}");
+                        return Ok(
+                            JsonConvert.SerializeObject(friendship)
+                        );
                     }
                     catch(FriendshipDoesNotExistException)
                     {
@@ -180,6 +190,7 @@ namespace Friendships.Controllers
 
                 if(fromEmail != null)
                 {
+                    _logger.LogInformation($"Retrieved all friendships for {fromEmail}");
                     return Ok(
                         JsonConvert.SerializeObject(friendshipRepo.GetAllFriendships(fromEmail))
                     );

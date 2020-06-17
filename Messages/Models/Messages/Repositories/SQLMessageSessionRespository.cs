@@ -33,9 +33,8 @@ namespace Messages.Models.Repositories
             if(session != null)
             {
                 if(!session.Emails.Split(';').Contains(requesterEmail))
-                {
                     throw new EmailNotAssociatedWithMessageSessionException();
-                }
+
                 await dbContext.Messages.AddAsync(message);
                 await dbContext.SaveChangesAsync();
             }

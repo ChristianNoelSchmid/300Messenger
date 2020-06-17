@@ -3,6 +3,10 @@ using Shared.Models;
 
 namespace Friendships.Models
 {
+    /// <summary>
+    /// The database context for the microservice
+    /// Connects with the Friendships database
+    /// </summary>
     public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions options) : base(options)
@@ -10,6 +14,10 @@ namespace Friendships.Models
 
         public DbSet<Friendship> Friendships { get; set; }
 
+        /// <summary>
+        /// Seed Friendship data into the database upon creation
+        /// </summary>
+        /// <param name="builder"></param>
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<Friendship>().HasData(

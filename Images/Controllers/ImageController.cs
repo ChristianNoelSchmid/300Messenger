@@ -81,7 +81,7 @@ namespace Images.Controllers
                     if (photoPath != null)
                     {
                         System.IO.File.Delete(photoPath.PhotoPath);
-                        //System.IO.File.Delete(photoPath.PhotoPath.Replace(".", "THUMB."));
+                        System.IO.File.Delete(photoPath.PhotoPath.Replace(".", "THUMB."));
                         await photoRepo.UpdatePhotoPath(
                             fromEmail, filePath
                         );
@@ -100,9 +100,10 @@ namespace Images.Controllers
                         await file.CopyToAsync(photoStream);
                     }
 
-                    //var thumbImage = ImageTools.ConvertToSize(file.OpenReadStream(), 64, 64);
-                    //thumbImage.Save(filePath.Replace(".", "THUMB.")); 
+                    var thumbImage = ImageTools.ConvertToSize(file.OpenReadStream(), 64, 64);
+                    thumbImage.Save(filePath.Replace(".", "THUMB."));
 
+                    _logger.LogInformation($"Updated profile photo for email {fromEmail}");
                     return Ok();
                 } 
             }
@@ -124,13 +125,14 @@ namespace Images.Controllers
                 }
 
                 FileStream imageStream;
-                //if (viewModel.IsThumb)
-                    //imageStream = System.IO.File.OpenRead(photoPath.PhotoPath.Replace(".", "THUMB."));
-                //else
+                if (viewModel.IsThumb)
+                    imageStream = System.IO.File.OpenRead(photoPath.PhotoPath.Replace(".", "THUMB."));
+                else
                     imageStream = System.IO.File.OpenRead(photoPath.PhotoPath);
 
                 var dotSplits = Path.GetFileName(photoPath.PhotoPath).Split('.');
 
+                _logger.LogInformation($"Retrieving profile photo for email {viewModel.Email}");
                 return File(imageStream, $"image/{dotSplits[dotSplits.Length - 1]}");
             }
 

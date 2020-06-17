@@ -81,8 +81,7 @@ namespace Mobile.Pages
 
             var photoResult = await ImagesApi.GetProfileImage(_userContext.User.Email, false);
 
-            if (photoResult.IsSuccessful)
-                _userContext.Photo = photoResult.Content;
+            _userContext.Photo = photoResult.Content;
 
             LayoutLoading.IsVisible = false;
             LayoutContent.IsVisible = true;

@@ -2,32 +2,34 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:skia="clr-namespace:SkiaSharp.Views.Forms;assembly=SkiaSharp.Views.Forms"
              mc:Ignorable="d"
              x:Class="Mobile.Pages.LoginPage">
         <ContentPage.Content>
-            <StackLayout>
+        <StackLayout BackgroundColor="DodgerBlue">
             <Label HeightRequest="75"
                Text="Please confirm your email address to login" 
                TextColor="Transparent"
                HorizontalTextAlignment="Center" VerticalTextAlignment="Center" 
                FontSize="Medium"
                x:Name="ConfirmMessage"/>
-            
+
             <StackLayout Margin="20,40,20,10" VerticalOptions="Center">
 
-                <Label 
-                    FontSize="Large" 
-                    Text="Login"
-                    HorizontalOptions="Center"
-                    FontAttributes="Bold" />
-
+                <Image
+                    WidthRequest="150"
+                    HeightRequest="150"
+                    Source="Logo.png" />
                 <Entry 
+                    TextColor="White"
+                    PlaceholderColor="White"
                     x:Name="EntryEmail"
                     Placeholder="Email"
                     HeightRequest="50" />
 
                 <Entry 
+                    TextColor="White"
+                    PlaceholderColor="White"
                     x:Name="EntryPassword"
                     Placeholder="Password"
                     IsPassword="True"
@@ -36,6 +38,8 @@
                 <Grid>
                     <StackLayout>
                         <Button 
+                            BackgroundColor="LightBlue"
+                            TextColor="Black"
                             x:Name="ButtonLogin"
                             Text="Login" 
                             Clicked="OnLoginPressed" />
@@ -48,7 +52,7 @@
                             x:Name="ButtonRegister"
                             Margin="0,0,0,0"
                             Text="Register"
-                            TextColor="DarkBlue"
+                            TextColor="White"
                             BackgroundColor="Transparent"
                             Clicked="OnRegisterPressed" />
                     </StackLayout>
@@ -61,6 +65,6 @@
                     </StackLayout>
                 </Grid>
             </StackLayout>
-         </StackLayout>
+        </StackLayout>
     </ContentPage.Content>
 </ContentPage>

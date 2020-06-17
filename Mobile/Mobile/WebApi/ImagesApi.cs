@@ -37,7 +37,7 @@ namespace Mobile.WebApi
                     );
                 }
 
-                return new ResponseResult<ImageSource>(false, null);
+                return new ResponseResult<ImageSource>(false, ImageSource.FromFile("default_profile.png"));
             }
         }
 
@@ -60,8 +60,10 @@ namespace Mobile.WebApi
                         await response.Content.ReadAsByteArrayAsync()
                     );
                 }
-
-                return new ResponseResult<byte[]>(false, null);
+                else return new ResponseResult<byte[]>(
+                    false,
+                    null
+                );
             }
         }
 

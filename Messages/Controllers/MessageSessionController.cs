@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Shared.Models;
 using Shared.ViewModels;
@@ -27,12 +28,15 @@ namespace Messages.Controllers
     {
         private readonly IMessageSessionRepository sessionRepository;
         private readonly IHttpClientFactory clientFactory;
+        private readonly ILogger<MessageSessionController> logger;
 
         public MessageSessionController(IMessageSessionRepository sessionRepository,
-                                        IHttpClientFactory clientFactory)
+                                        IHttpClientFactory clientFactory,
+                                        ILogger<MessageSessionController> logger)
         {
             this.sessionRepository = sessionRepository;
             this.clientFactory = clientFactory;
+            this.logger = logger;
         }
 
         [HttpGet]
@@ -48,7 +52,9 @@ namespace Messages.Controllers
                 {
                     try
                     {
-                        var session = await sessionRepository.GetMessageSessionAsync(viewModel.Value, fromEmail); 
+                        var session = await sessionRepository.GetMessageSessionAsync(viewModel.Value, fromEmail);
+
+                        logger.LogInformation($"Retrieved session (ID={viewModel.Value}) using email {fromEmail}");
                         return Ok(JsonConvert.SerializeObject(session));
                     }  
                     catch(EmailNotAssociatedWithMessageSessionException)
@@ -71,6 +77,7 @@ namespace Messages.Controllers
 
                 if(fromEmail != null)
                 {
+                    logger.LogInformation($"Retrieving all User sessions for email {fromEmail}");
                     return Ok(
                         sessionRepository.GetMessageSessions(fromEmail) 
                     );
@@ -103,6 +110,8 @@ namespace Messages.Controllers
                     }
 
                     await sessionRepository.CreateMessageSessionAsync(session);
+
+                    logger.LogInformation($"Creating new session \"{viewModel.Title}\" for Email {fromEmail}");
                     return Ok(JsonConvert.SerializeObject(session));
                 }
 
@@ -208,7 +217,7 @@ namespace Messages.Controllers
                 if(fromEmail != null)
                 {
                     try
-                    {
+                    { 
                         var session = await sessionRepository.AddMessageToSessionAsync(
                             viewModel.SessionId, fromEmail, 
                             new Message()
@@ -220,6 +229,7 @@ namespace Messages.Controllers
                             }
                         );
 
+                        logger.LogInformation($"Adding new message to session (ID={viewModel.SessionId}) from email {fromEmail}");
                         return Ok(JsonConvert.SerializeObject(session));
                     }
                     catch(EmailNotAssociatedWithMessageSessionException)
@@ -244,6 +254,7 @@ namespace Messages.Controllers
                 {
                     try
                     {
+                        logger.LogInformation($"Retrieving all messages for session (ID={viewModel.Value}) from email {fromEmail}");
                         return Ok(
                             JsonConvert.SerializeObject(await sessionRepository.GetMessagesForSessionAsync(
                                 viewModel.Value,

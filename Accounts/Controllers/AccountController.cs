@@ -332,6 +332,7 @@ namespace Accounts.Controllers
 
                 try
                 {
+                    logger.LogInformation($"Retrieved User with email {fromEmail}");
                     return Ok(JsonConvert.SerializeObject(await userRepo.GetUserAsync(fromEmail)));
                 }
                 catch(UserDoesNotExistException)
@@ -364,6 +365,7 @@ namespace Accounts.Controllers
 
                 try
                 {
+                    logger.LogInformation($"Retrieved User with email {viewModel.Email} with Jwt token from {fromEmail}");
                     return Ok(JsonConvert.SerializeObject(await userRepo.GetUserAsync(viewModel.Email)));
                 }
                 catch (UserDoesNotExistException)
@@ -410,6 +412,8 @@ namespace Accounts.Controllers
                         }
                     }
                 }
+
+                logger.LogInformation($"Retrieved Users matching query {viewModel.Value}");
                 return new JsonResult(
                     userRepo.Where(
                         u =>

@@ -38,6 +38,9 @@ namespace Mobile.Pages
         {
             base.OnAppearing();
 
+            LayoutLoading.IsVisible = true;
+            LayoutMessages.IsEnabled = false;
+
             _context.UserEmail = (await AccountsApi.GetUserByJwt(_settings.Jwt)).Content.Email;
             await _context.Initialize();
             await _context.RefreshMessages(_settings.Jwt);
@@ -52,6 +55,9 @@ namespace Mobile.Pages
             {
                 ButtonEditSession.IsVisible = true;
             }
+            
+            LayoutLoading.IsVisible = false;
+            LayoutMessages.IsEnabled = true;
         }
 
         protected async override void OnDisappearing()
@@ -117,47 +123,64 @@ namespace Mobile.Pages
         public async Task Initialize()
         {
             var keys = _userPhotos.Keys.ToList();
-            foreach(var email in keys)
+            foreach (var email in keys)
             {
                 var imageResult = await ImagesApi.GetProfileImagePersistent(email, true);
-                if(imageResult.IsSuccessful)
+                if (imageResult.IsSuccessful)
                 {
                     _userPhotos[email] = imageResult.Content;
                 }
             }
         }
-        
+
         public async Task RefreshMessages(string jwt)
         {
             var messagesResult = await MessagesApi.GetMessages(jwt, Session.Id);
             if (messagesResult.IsSuccessful && messagesResult.Content != null)
             {
                 var messages = messagesResult.Content;
-                if (messages.Length > Messages.Count)
-                {
-                    _messages.InsertRange(0,
-                        messages.Take(messages.Length - Messages.Count).Select(
-                            (Message message) =>
+                _messages.InsertRange(0,
+                    messages.Take(messages.Length - Messages.Count).Select(
+                        (Message message) =>
+                        {
+                            var messageContext = new MessageContext
                             {
-                                var messageContext = new MessageContext
-                                {
-                                    TimeStamp = message.TimeStamp,
-                                    Email = message.Email,
-                                    Content = message.Content,
-                                    IsUser = message.Email == UserEmail,
-                                    ProfilePhoto = ImageSource.FromStream(() => new MemoryStream(_userPhotos[message.Email]))
-                                };
-                                return messageContext;
-                            }
-                        )
-                    ); 
+                                TimeStamp = message.TimeStamp,
+                                Email = message.Email,
+                                Content = message.Content,
+                                IsUser = message.Email == UserEmail,
+                            };
+                            ++_rowCounter;
 
-                    OnPropertyChanged(nameof(Messages));
+                            return messageContext;
+                        }
+                    )
+                );
+
+                string lastEmail = null;
+                foreach (var messageContext in Messages.Reverse())
+                {
+                    if (messageContext.Email != lastEmail)
+                    {
+                        if (_userPhotos[messageContext.Email] != null)
+                            messageContext.ProfilePhoto = ImageSource.FromStream(
+                                () => new MemoryStream(_userPhotos[messageContext.Email])
+                            );
+                        else
+                            messageContext.ProfilePhoto = ImageSource.FromFile("default_profile.png");
+
+                        lastEmail = messageContext.Email;
+                        ++_rowCounter;
+                    }
+                    messageContext.RowColor = _rowCounter % 2 == 0 ? Color.White : Color.FromRgb(245, 245, 245);
                 }
+
+                OnPropertyChanged(nameof(Messages));
             }
         }
 
         /* Static Properties */
+        private int _rowCounter = 0;
         public MessageSession Session { get; private set; }
             
         public string UserEmail { get; set; }
@@ -174,14 +197,37 @@ namespace Mobile.Pages
         public ReadOnlyCollection<MessageContext> Messages => _messages.AsReadOnly();
     }
 
-    public class MessageContext
-    {  
+    public class MessageContext : INotifyPropertyChanged
+    { 
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string name = "") =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        /* ------------------ */
+
+        /* Dynamic Properties */
+        private ImageSource _profilePhoto = null;
+        public ImageSource ProfilePhoto
+        {
+            get => _profilePhoto;
+            set { _profilePhoto = value; OnPropertyChanged(); }
+        }
+
+        private Color _rowColor;
+        public Color RowColor
+        {
+            get => _rowColor;
+            set
+            {
+                _rowColor = value;
+                OnPropertyChanged();
+            }
+        }
         /* Static Properties */
         public DateTime TimeStamp { get; set; }
         public string Email { get; set; }
         public string Content { get; set; }
         public bool IsUser { get; set; }
         public bool IsOther => !IsUser;
-        public ImageSource ProfilePhoto { get; set; } = null;
+        public double ContentWidth => Application.Current.MainPage.Width - 65.0;
     }
 }

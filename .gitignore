@@ -341,17 +341,17 @@ healthchecksdb
 
 # appsettings.json (in /300Messenger/)
 # Because it contains Db information, it is excluded
-# Authentication/appsettings.json
-# Authentication/appsettings.Development.json
-# Friendships/appsettings.json
-# Friendships/appsettings.Development.json
-# Images/appsettings.json
-# Images/appsettings.Development.json
-# Messages/appsettings.json
-# Messages/appsettings.Development.json
+Accounts/appsettings.json
+Accounts/appsettings.Development.json
+Friendships/appsettings.json
+Friendships/appsettings.Development.json
+Images/appsettings.json
+Images/appsettings.Development.json
+Messages/appsettings.json
+Messages/appsettings.Development.json
 
-# Same with Properties/launchsettings.json
-# Images/Properties/launchsettings.json
-# Messages/Properties/launchsettings.json
-# Friendships/launchsettings.json
-# Accounts/Properties/launchsettings.json
+# Same with Properties/launchSettings.json
+Images/Properties/launchSettings.json
+Messages/Properties/launchSettings.json
+Friendships/launchSettings.json
+Accounts/Properties/launchSettings.json

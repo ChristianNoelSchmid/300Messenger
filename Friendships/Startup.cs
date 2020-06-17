@@ -43,6 +43,8 @@ namespace Friendships
                 options.UseMySql(Configuration.GetConnectionString("DefaultConnection"))
             );
 
+            services.AddLogging();
+
             services.AddScoped<IFriendshipRepo, DbFriendshipRepo>();
         }
 

@@ -14,16 +14,6 @@
                 HeightRequest="60"
                 HorizontalTextAlignment="Center" 
                 VerticalTextAlignment="Center" />
-            <ScrollView 
-                Margin="0,10,0,-10"
-                HeightRequest="100"
-                BackgroundColor="LightGray">
-            <Label
-                    Text="{Binding Description}"
-                    FontSize="Medium"
-                    HorizontalTextAlignment="Center"
-                    VerticalTextAlignment="Center" />
-            </ScrollView>
             <Button
                 IsVisible="false"
                 BackgroundColor="LightBlue"
@@ -31,46 +21,70 @@
                 Text="Edit Session"
                 Clicked="OnEditSessionPressed"
                 x:Name="ButtonEditSession" />
-            <ListView 
-                FlowDirection="RightToLeft"
-                Rotation="180"
-                HasUnevenRows="True"
-                ItemsSource="{Binding Messages}"
-                ItemTapped="OnUserMessagePressed">
-            <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <ViewCell>
-                            <Grid 
-                                FlowDirection="RightToLeft" 
-                                Rotation="180" Padding="10">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="75" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="75" />
-                                </Grid.ColumnDefinitions>
-                                <Image Source="{Binding ProfilePhoto}" IsVisible="{Binding IsUser}" />
-                                <Label Grid.Column="1" FontSize="Medium" Text="{Binding Content}" />
-                                <Image Source="{Binding ProfilePhoto}" Grid.Column="2" IsVisible="{Binding IsOther}" />
-                            </Grid>
-                        </ViewCell>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
             <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
-                    <ColumnDefinition Width="40"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-                <Editor
-                    x:Name="EditorAddNewMessage"
-                    HeightRequest="200"
-                    Placeholder="New Message..." />
-                <Button
-                    Grid.Column="1"
-                    Text="^"
-                    FontSize="Title"
-                    BackgroundColor="LightBlue"
-                    Clicked="OnNewMessageEntered" />
+                <StackLayout
+                    x:Name="LayoutMessages">
+                    <ListView 
+                        SeparatorVisibility="None"
+                        FlowDirection="RightToLeft"
+                        Rotation="180"
+                        HasUnevenRows="True"
+                        ItemsSource="{Binding Messages}"
+                        ItemTapped="OnUserMessagePressed">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <FlexLayout
+                                        BackgroundColor="{Binding RowColor}"
+                                        FlowDirection="RightToLeft" 
+                                        Rotation="180" Padding="10">
+                                        <Image 
+                                            Source="{Binding ProfilePhoto}" 
+                                            WidthRequest="75"
+                                            Margin="20,0"
+                                            IsVisible="{Binding IsUser}" />
+                                        <Label  
+                                            VerticalOptions="StartAndExpand" 
+                                            Text="{Binding Content}"
+                                            WidthRequest="{Binding ContentWidth}"
+                                            FontSize="Medium"  />
+                                        <Image 
+                                            Source="{Binding ProfilePhoto}" 
+                                            WidthRequest="75"
+                                            Margin="20,0"
+                                            IsVisible="{Binding IsOther}" />
+                                    </FlexLayout>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="40"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Editor
+                            x:Name="EditorAddNewMessage"
+                            HeightRequest="200"
+                            Placeholder="New Message..." />
+                        <Button
+                            Grid.Column="1"
+                            Text="^"
+                            FontSize="Title"
+                            BackgroundColor="LightBlue"
+                            Clicked="OnNewMessageEntered" />
+                    </Grid>
+                </StackLayout>
+                <StackLayout
+                    x:Name="LayoutLoading"
+                    VerticalOptions="FillAndExpand">
+                    <ActivityIndicator
+                        Margin="0,0,0,150"
+                        Color="Orange"
+                        IsRunning="True"
+                        VerticalOptions="CenterAndExpand">
+                    </ActivityIndicator>
+                </StackLayout>
             </Grid>
         </StackLayout>
     </ContentPage.Content>
