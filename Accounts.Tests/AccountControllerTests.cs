@@ -20,7 +20,7 @@ namespace Accounts.Tests
         public void SetUp()
         {
             controller = new AccountController(
-                null, new MockUserRepo(), new MockToConfirmRepo(),
+                new MockUserRepo(), new MockToConfirmRepo(),
                 new TokenBuilder(), null, null, null
             );
         }
